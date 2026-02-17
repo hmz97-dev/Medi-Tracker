@@ -4,6 +4,6 @@ export interface Doctor {
   last_name: string;
   email: string;
   phone: string;
-  specialty: string;
+  speciality: string;
   description?: string;
 }
