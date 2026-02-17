@@ -1,7 +1,7 @@
-import { Doctor } from './doctor.model';
-import { Patient } from './patient.model';
+import { Doctor } from '../models/doctor.model';
+import { Patient } from '../models/patient.model';
 
-export interface Appointment {
+export interface RDV {
   id: number;
   appointment_date: string;
   status: string;
