@@ -1,0 +1,152 @@
+<div class="register-layout">
+	<app-sideware currentPage="patient" />
+
+	<main class="content">
+		<section class="register-card">
+			<p class="section-title">Patient registrer</p>
+
+			@if (feedbackMessage) {
+				<div class="feedback">{{ feedbackMessage }}</div>
+			}
+
+			@if (showHelp) {
+				<div class="help-panel">
+					<strong>Aide rapide</strong>
+					<p>Utilise la recherche pour filtrer les patients, le filtre pour le statut, et le menu ••• pour modifier ou supprimer une ligne.</p>
+				</div>
+			}
+
+			@if (showAddForm) {
+				<div class="add-form">
+					<h3>Ajouter un patient</h3>
+					<div class="form-grid">
+						<input type="text" placeholder="Nom complet" [(ngModel)]="newPatient.name" />
+						<input type="text" placeholder="Diagnostic" [(ngModel)]="newPatient.diagnosis" />
+						<select [(ngModel)]="newPatient.status">
+							<option value="Recovered">Recovered</option>
+							<option value="Awaiting surgery">Awaiting surgery</option>
+							<option value="On treatment">On treatment</option>
+						</select>
+						<input type="text" placeholder="Dernier rendez-vous (jj/mm/aaaa)" [(ngModel)]="newPatient.lastAppointment" />
+						<input type="text" placeholder="Prochain rendez-vous (jj/mm/aaaa)" [(ngModel)]="newPatient.nextAppointment" />
+					</div>
+					<div class="form-actions">
+						<button type="button" class="cancel-btn" (click)="toggleAddForm()">Annuler</button>
+						<button type="button" class="save-btn" (click)="addPatient()">Enregistrer</button>
+					</div>
+				</div>
+			}
+
+			@if (showSearch) {
+				<div class="search-row">
+					<input
+						type="text"
+						placeholder="Rechercher par nom ou diagnostic..."
+						[(ngModel)]="searchTerm"
+						(input)="onSearchChange()"
+					/>
+				</div>
+			}
+
+			@if (showFilter) {
+				<div class="filter-row">
+					@for (filter of filters; track filter) {
+						<button
+							type="button"
+							[class.active-filter]="activeFilter === filter"
+							(click)="setFilter(filter)"
+						>
+							{{ filter }}
+						</button>
+					}
+				</div>
+			}
+
+			<div class="toolbar">
+				<h2>Total Patients <span>({{ totalPatients }})</span></h2>
+				<div class="toolbar-actions">
+					<button type="button" aria-label="add" (click)="toggleAddForm()">+</button>
+					<button type="button" aria-label="search" (click)="toggleSearch()">⌕</button>
+					<button type="button" aria-label="filter" (click)="toggleFilter()">⌯</button>
+					<button type="button" aria-label="help" (click)="toggleHelp()">?</button>
+				</div>
+			</div>
+
+			<div class="context-row">
+				<div>
+					<strong>{{ filteredRows.length }}</strong> résultat(s) affiché(s)
+					@if (activeFilter !== 'All') {
+						<span class="filter-badge">Filtre: {{ activeFilter }}</span>
+					}
+				</div>
+				<button type="button" class="reset-btn" (click)="resetView()">Réinitialiser</button>
+			</div>
+
+			<div class="table-wrap">
+				<table>
+					<thead>
+						<tr>
+							<th>
+								<button type="button" class="th-sort" (click)="sortBy('name')">Name <span>{{ sortIndicator('name') }}</span></button>
+							</th>
+							<th>
+								<button type="button" class="th-sort" (click)="sortBy('diagnosis')">Diagnosis <span>{{ sortIndicator('diagnosis') }}</span></button>
+							</th>
+							<th>
+								<button type="button" class="th-sort" (click)="sortBy('status')">Status <span>{{ sortIndicator('status') }}</span></button>
+							</th>
+							<th>
+								<button type="button" class="th-sort" (click)="sortBy('lastAppointment')">Last Appointment <span>{{ sortIndicator('lastAppointment') }}</span></button>
+							</th>
+							<th>
+								<button type="button" class="th-sort" (click)="sortBy('nextAppointment')">Next appointment <span>{{ sortIndicator('nextAppointment') }}</span></button>
+							</th>
+							<th class="options-col">Options</th>
+						</tr>
+					</thead>
+					<tbody>
+						@for (row of displayedRows; track row.id) {
+							<tr>
+								<td>{{ row.name }}</td>
+								<td>{{ row.diagnosis }}</td>
+								<td>
+									<span class="status-pill" [class]="'status-pill ' + statusClass(row.status)">
+										{{ row.status }}
+									</span>
+								</td>
+								<td>{{ row.lastAppointment }}</td>
+								<td>{{ row.nextAppointment }}</td>
+								<td class="options-col">
+									<div class="row-actions">
+										<button type="button" class="menu-trigger" (click)="toggleRowMenu(row.id)">•••</button>
+										@if (openedMenuId === row.id) {
+											<div class="menu-popover">
+												<button type="button" (click)="cycleStatus(row.id)">Changer statut</button>
+												<button type="button" class="danger-action" (click)="deleteRow(row.id)">Supprimer</button>
+											</div>
+										}
+									</div>
+								</td>
+							</tr>
+						}
+						@if (displayedRows.length === 0) {
+							<tr>
+								<td colspan="6" class="empty-row">Aucun patient trouvé pour ce filtre.</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+
+			<footer class="pagination">
+				<button type="button" (click)="previousPage()" [disabled]="currentPage === 1">‹</button>
+				<span>Prev</span>
+				@for (page of pageNumbers; track page) {
+					<a [class.active]="currentPage === page" (click)="setPage(page)">{{ page }}</a>
+				}
+				<span>Next</span>
+				<button type="button" (click)="nextPage()" [disabled]="currentPage === totalPages">›</button>
+			</footer>
+		</section>
+	</main>
+</div>

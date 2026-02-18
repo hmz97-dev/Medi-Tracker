@@ -1,0 +1,108 @@
+<div class="page-shell">
+
+  <app-sideware currentPage="doctors" />
+
+  <main class="doctor-container">
+
+  <!-- HEADER -->
+  <div class="header">
+
+    <div>
+      <h1>Bonjour, Dr. {{ doctor.firstName }} {{ doctor.lastName }}</h1>
+      <p class="subtitle">
+        Bienvenue dans votre espace médecin sécurisé.
+      </p>
+    </div>
+
+    <button class="btn-primary" (click)="toggleEdit()">
+      {{ editMode ? 'Annuler' : 'Modifier profil' }}
+    </button>
+
+  </div>  
+
+
+  <!-- PROFIL -->
+  <div class="card">
+
+    <h2>Informations du médecin</h2>
+
+    <!-- MODE AFFICHAGE -->
+    <div class="info-grid" *ngIf="!editMode">
+
+      <div class="info">
+        <label>Prénom</label>
+        <p>{{ doctor.firstName }}</p>
+      </div>
+
+      <div class="info">
+        <label>Nom</label>
+        <p>{{ doctor.lastName }}</p>
+      </div>
+
+      <div class="info">
+        <label>Email</label>
+        <p>{{ doctor.email }}</p>
+      </div>
+
+      <div class="info">
+        <label>Téléphone</label>
+        <p>{{ doctor.phone }}</p>
+      </div>
+
+      <div class="info">
+        <label>Spécialité</label>
+        <p>{{ doctor.speciality }}</p>
+      </div>
+
+      <div class="info">
+        <label>Description</label>
+        <p>{{ doctor.description }}</p>
+      </div>
+
+    </div>
+
+
+    <!-- MODE EDITION -->
+    <div class="form-grid" *ngIf="editMode">
+
+      <div>
+        <label>Prénom</label>
+        <input [(ngModel)]="doctor.firstName">
+      </div>
+
+      <div>
+        <label>Nom</label>
+        <input [(ngModel)]="doctor.lastName">
+      </div>
+
+      <div>
+        <label>Email</label>
+        <input [(ngModel)]="doctor.email">
+      </div>
+
+      <div>
+        <label>Téléphone</label>
+        <input [(ngModel)]="doctor.phone">
+      </div>
+
+      <div>
+        <label>Spécialité</label>
+        <input [(ngModel)]="doctor.speciality">
+      </div>
+
+      <div>
+        <label>Description</label>
+        <textarea [(ngModel)]="doctor.description"></textarea>
+      </div>
+
+      <button class="btn-save" (click)="save()">
+        Enregistrer
+      </button>
+
+    </div>
+
+  </div>
+
+  </main>
+
+</div>
