@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { RDVList } from './rdv-list';
+import { Doctors } from './doctors';
 
-describe('RDVList', () => {
-  let component: RDVList;
-  let fixture: ComponentFixture<RDVList>;
+describe('Doctors', () => {
+  let component: Doctors;
+  let fixture: ComponentFixture<Doctors>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RDVList]
+      imports: [Doctors]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(RDVList);
+    fixture = TestBed.createComponent(Doctors);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

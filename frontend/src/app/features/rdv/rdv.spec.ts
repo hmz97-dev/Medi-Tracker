@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { RDVForm } from './rdv-form';
+import { RDV } from './rdv';
 
-describe('RDVForm', () => {
-  let component: RDVForm;
-  let fixture: ComponentFixture<RDVForm>;
+describe('RDV', () => {
+  let component: RDV;
+  let fixture: ComponentFixture<RDV>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RDVForm]
+      imports: [RDV]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(RDVForm);
+    fixture = TestBed.createComponent(RDV);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

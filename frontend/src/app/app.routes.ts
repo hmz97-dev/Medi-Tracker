@@ -18,19 +18,19 @@ export const routes: Routes = [
   // Routes Patients (Lazy Loading)
   {
     path: 'patients',
-    loadChildren: () => import('./features/patients/patients.routes').then(m => m.PATIENT_ROUTES)
+    loadComponent: () => import('./features/patients/patients').then(m => m.Patients)
   },
 
   // Routes Doctors (Lazy Loading)
   {
     path: 'doctors',
-    loadChildren: () => import('./features/doctors/doctors.routes').then(m => m.DOCTOR_ROUTES)
+    loadComponent: () => import('./features/doctors/doctors').then(m => m.Doctors)
   },
 
   // Routes RDV (Lazy Loading)
   {
-    path: 'RDV',
-    loadChildren: () => import('./features/RDV/RDV.routes').then(m => m.RDV_ROUTES)
+    path: 'rdv',
+    loadComponent: () => import('./features/rdv/rdv').then(m => m.RDV)
   },
 
   // Page 404

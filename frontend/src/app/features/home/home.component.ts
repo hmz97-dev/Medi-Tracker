@@ -11,18 +11,18 @@ import { RouterLink } from '@angular/router';
       <h1>🏥 Medi-Tracker</h1>
       <nav>
         <a routerLink="/patients" class="card">
-          <h2>👥 Patients</h2>
-          <p>Gérer les patients</p>
+          <h2>👥 Profil Patients</h2>
+          <p>Consulter les profils des patients</p>
         </a>
         
         <a routerLink="/doctors" class="card">
-          <h2>👨‍⚕️ Médecins</h2>
-          <p>Gérer les médecins</p>
+          <h2>👨‍⚕️ Profil Médecins</h2>
+          <p>Consulter les profils des médecins</p>
         </a>
         
-        <a routerLink="/RDV" class="card">
-          <h2>📅 Rendez-vous</h2>
-          <p>Gérer les RDV</p>
+        <a routerLink="/rdv" class="card">
+          <h2>📅 Calendrier RDV</h2>
+          <p>Consulter le calendrier des rendez-vous</p>
         </a>
       </nav>
     </div>
