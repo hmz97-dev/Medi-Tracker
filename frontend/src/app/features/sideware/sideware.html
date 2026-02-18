@@ -1,0 +1,12 @@
+<aside class="sidebar">
+	<div class="brand">
+		<span class="logo">M</span>
+		<h2>MediTracker</h2>
+	</div>
+
+	<nav class="menu">
+		<a routerLink="/patient" [class.active]="currentPage === 'patient'">Patient</a>
+		<a routerLink="/doctors" [class.active]="currentPage === 'doctors'">Médecins</a>
+		<a routerLink="/rdv" [class.active]="currentPage === 'rdv'">Rendez-vous</a>
+	</nav>
+</aside>

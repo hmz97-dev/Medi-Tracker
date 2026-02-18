@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Sideware } from '../sideware/sideware';
 
 type MedicalStatus = 'Recovered' | 'Awaiting surgery' | 'On treatment';
 type StatusFilter = 'All' | MedicalStatus;
@@ -28,7 +29,7 @@ type SortDirection = 'asc' | 'desc';
 @Component({
 	selector: 'app-patient',
 	standalone: true,
-	imports: [CommonModule, FormsModule],
+	imports: [CommonModule, FormsModule, Sideware],
 	templateUrl: './patient.html',
 	styleUrl: './patient.scss'
 })
