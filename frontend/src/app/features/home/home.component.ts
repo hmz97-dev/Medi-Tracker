@@ -10,7 +10,7 @@ import { RouterLink } from '@angular/router';
     <div class="dashboard">
       <h1>🏥 Medi-Tracker</h1>
       <nav>
-        <a routerLink="/patients" class="card">
+        <a routerLink="/patient" class="card">
           <h2>👥 Profil Patients</h2>
           <p>Consulter les profils des patients</p>
         </a>
