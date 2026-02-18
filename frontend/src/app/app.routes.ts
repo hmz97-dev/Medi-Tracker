@@ -15,10 +15,10 @@ export const routes: Routes = [
     component: HomeComponent
   },
 
-  // Routes Patients (Lazy Loading)
+  // Route Patient (Lazy Loading)
   {
-    path: 'patients',
-    loadComponent: () => import('./features/patients/patients').then(m => m.Patients)
+    path: 'patient',
+    loadComponent: () => import('./features/patient/patient').then(m => m.Patient)
   },
 
   // Routes Doctors (Lazy Loading)

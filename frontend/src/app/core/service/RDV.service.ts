@@ -105,7 +105,7 @@ export class RDVService {
       
       // Filtrer les créneaux déjà pris pour ce médecin à cette date
       const bookedSlots = this.mockAppointments
-        .filter(a => a.id_doctor === doctorId && a.appointment_date.startsWith(date))
+        .filter(a => a.id_doctor === doctorId && a.appointment_date.startsWith(date) && a.status !== 'cancelled')
         .map(a => a.appointment_date.substring(11, 16));
       
       const availableSlots = allSlots.filter(slot => !bookedSlots.includes(slot));
