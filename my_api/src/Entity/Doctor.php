@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\DoctorRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DoctorRepository::class)]
@@ -31,6 +33,15 @@ class Doctor
     #[ORM\Column(length: 255)]
     private ?string $Description = null;
 
+    // ✅ Doctor -> RDV (OneToMany)
+    #[ORM\OneToMany(mappedBy: 'doctor', targetEntity: RDV::class, orphanRemoval: true)]
+    private Collection $rdvs;
+
+    public function __construct()
+    {
+        $this->rdvs = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -44,7 +55,6 @@ class Doctor
     public function setFirstName(string $firstName): static
     {
         $this->firstName = $firstName;
-
         return $this;
     }
 
@@ -56,7 +66,6 @@ class Doctor
     public function setLastName(string $lastName): static
     {
         $this->lastName = $lastName;
-
         return $this;
     }
 
@@ -68,7 +77,6 @@ class Doctor
     public function setEmail(string $Email): static
     {
         $this->Email = $Email;
-
         return $this;
     }
 
@@ -80,7 +88,6 @@ class Doctor
     public function setPhoneNumber(string $PhoneNumber): static
     {
         $this->PhoneNumber = $PhoneNumber;
-
         return $this;
     }
 
@@ -92,7 +99,6 @@ class Doctor
     public function setSpeciality(string $Speciality): static
     {
         $this->Speciality = $Speciality;
-
         return $this;
     }
 
@@ -104,6 +110,34 @@ class Doctor
     public function setDescription(string $Description): static
     {
         $this->Description = $Description;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RDV>
+     */
+    public function getRdvs(): Collection
+    {
+        return $this->rdvs;
+    }
+
+    public function addRdv(RDV $rdv): static
+    {
+        if (!$this->rdvs->contains($rdv)) {
+            $this->rdvs->add($rdv);
+            $rdv->setDoctor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRdv(RDV $rdv): static
+    {
+        if ($this->rdvs->removeElement($rdv)) {
+            if ($rdv->getDoctor() === $this) {
+                $rdv->setDoctor(null);
+            }
+        }
 
         return $this;
     }
