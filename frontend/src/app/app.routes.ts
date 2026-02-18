@@ -14,8 +14,8 @@ export const routes: Routes = [
     path: 'home',
     component: HomeComponent
   },
-
-  // Route Patient (Lazy Loading)
+ 
+  // Route Patient (Lazy Loading) p
   {
     path: 'patient',
     loadComponent: () => import('./features/patient/patient').then(m => m.Patient)
