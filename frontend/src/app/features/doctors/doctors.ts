@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Sideware } from '../sideware/sideware';
 
 @Component({
   selector: 'app-doctors',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, Sideware],
   templateUrl: './doctors.html',
   styleUrl: './doctors.scss',
 })

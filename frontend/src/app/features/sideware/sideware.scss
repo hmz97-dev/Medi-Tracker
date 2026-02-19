@@ -1,0 +1,56 @@
+.sidebar {
+	min-height: 100vh;
+	background: #ffffff;
+	border-right: 1px solid #e7ebf1;
+	padding: 1rem 0.75rem;
+}
+
+.brand {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	margin-bottom: 1rem;
+	padding: 0 0.35rem;
+}
+
+.logo {
+	width: 30px;
+	height: 30px;
+	border-radius: 8px;
+	display: grid;
+	place-items: center;
+	background: #2239c8;
+	color: #fff;
+	font-size: 0.8rem;
+	font-weight: 700;
+}
+
+.brand h2 {
+	margin: 0;
+	font-size: 1.05rem;
+	color: #2338bf;
+}
+
+.menu {
+	display: grid;
+	gap: 0.35rem;
+}
+
+.menu a {
+	text-decoration: none;
+	color: #556886;
+	font-weight: 600;
+	padding: 0.55rem 0.65rem;
+	border-radius: 8px;
+	border: 1px solid transparent;
+}
+
+.menu a:hover {
+	background: #f4f7fc;
+}
+
+.menu a.active {
+	color: #2f55bb;
+	background: #edf3ff;
+	border-color: #d7e3fb;
+}
