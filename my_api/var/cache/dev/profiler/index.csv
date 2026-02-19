@@ -1,0 +1,6 @@
+532150,127.0.0.1,GET,http://127.0.0.1:8000/,1771497195,,404,request
+dd9aea,127.0.0.1,GET,http://localhost:8000/api/doctors/,1771497746,,301,request
+4f0cba,127.0.0.1,GET,http://localhost:8000/api/doctors,1771497748,b52869,500,request
+b52869,127.0.0.1,GET,http://localhost:8000/api/doctors,1771497748,,500,request
+5fcee4,127.0.0.1,GET,http://localhost:8000/api/doctors/,1771497816,835c85,404,request
+835c85,127.0.0.1,POST,http://localhost:8000/api/doctors/,1771497816,,404,request
