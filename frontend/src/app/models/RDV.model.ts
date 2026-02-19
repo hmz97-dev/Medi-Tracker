@@ -4,6 +4,7 @@ import { Patient } from '../models/patient.model';
 export interface RDV {
   id: number;
   appointment_date: string;
+  end_date?: string;
   status: string;
   reason: string;
 

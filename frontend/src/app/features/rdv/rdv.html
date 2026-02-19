@@ -1,10 +1,74 @@
 <div class="page-shell">
-	<app-sideware currentPage="rdv" />
+  <app-sideware currentPage="rdv" />
 
-	<main class="rdv-container">
-		<section class="rdv-card">
-			<h1>Rendez-vous</h1>
-			<p>La gestion détaillée des rendez-vous sera affichée ici.</p>
-		</section>
-	</main>
+  <main class="rdv-container">
+    <div class="rdv-page">
+      <aside class="rdv-actions">
+        <h2>{{ selectedRdvId ? 'Modifier RDV' : 'Nouveau RDV' }}</h2>
+        <p class="selected" *ngIf="selectedRdvId">RDV selectionne: #{{ selectedRdvId }}</p>
+
+        <form class="rdv-form" (ngSubmit)="saveFromForm()">
+          <label>
+            Patient
+            <select name="patient" [(ngModel)]="formModel.id_patient" required>
+              <option [ngValue]="null">Choisir un patient</option>
+              <option *ngFor="let patient of patients" [ngValue]="patient.id_patient">
+                {{ patient.first_name }} {{ patient.last_name }}
+              </option>
+            </select>
+          </label>
+
+          <label>
+            Medecin
+            <select name="doctor" [(ngModel)]="formModel.id_doctor" required>
+              <option [ngValue]="null">Choisir un medecin</option>
+              <option *ngFor="let doctor of doctors" [ngValue]="doctor.id_doctor">
+                Dr {{ doctor.first_name }} {{ doctor.last_name }}
+              </option>
+            </select>
+          </label>
+
+          <label>
+            Debut
+            <input type="datetime-local" name="start" [(ngModel)]="formModel.appointment_date" required />
+          </label>
+
+          <label>
+            Fin
+            <input type="datetime-local" name="end" [(ngModel)]="formModel.end_date" required />
+          </label>
+
+          <label>
+            Motif
+            <textarea
+              name="reason"
+              [(ngModel)]="formModel.reason"
+              rows="3"
+              placeholder="Motif de consultation"
+            ></textarea>
+          </label>
+
+          <div class="actions">
+            <button type="submit" [disabled]="!canSubmitForm()">
+              {{ selectedRdvId ? 'Enregistrer modifications' : 'Ajouter RDV' }}
+            </button>
+            <button type="button" class="ghost" (click)="resetForm()">Nouveau</button>
+            <button type="button" class="danger" (click)="deleteSelected()" [disabled]="!selectedRdvId">
+              Supprimer
+            </button>
+          </div>
+        </form>
+
+        <p class="hint">
+          Clique sur un creneau pour pre-remplir le formulaire. Clique sur un RDV pour le modifier.
+          Drag and drop / resize restent actifs dans le calendrier.
+        </p>
+        <p class="message" *ngIf="uiMessage">{{ uiMessage }}</p>
+      </aside>
+
+      <section class="rdv-calendar">
+        <full-calendar [options]="calendarOptions"></full-calendar>
+      </section>
+    </div>
+  </main>
 </div>
