@@ -1,0 +1,93 @@
+.rdv-page {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 16px;
+  padding: 16px;
+}
+
+.rdv-actions {
+  border: 1px solid #d8dde6;
+  border-radius: 12px;
+  padding: 16px;
+  background: #f8fafc;
+  align-self: start;
+}
+
+.rdv-actions h2 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+}
+
+.rdv-form {
+  display: grid;
+  gap: 10px;
+}
+
+.rdv-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.92rem;
+  color: #263142;
+}
+
+.rdv-form select,
+.rdv-form input,
+.rdv-form textarea {
+  width: 100%;
+  border: 1px solid #b7c2d0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: inherit;
+  background: #fff;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #0f4c81;
+  color: #fff;
+}
+
+button.ghost {
+  background: #dbe7f3;
+  color: #1b3854;
+}
+
+button.danger {
+  background: #b02a37;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.hint {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: #516176;
+}
+
+.rdv-calendar {
+  min-width: 0;
+  border: 1px solid #d8dde6;
+  border-radius: 12px;
+  background: #fff;
+  padding: 8px;
+}
+
+@media (max-width: 960px) {
+  .rdv-page {
+    grid-template-columns: 1fr;
+  }
+}

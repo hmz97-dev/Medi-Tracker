@@ -8,32 +8,35 @@ export const routes: Routes = [
     redirectTo: '/home',
     pathMatch: 'full'
   },
-  
+
   // Home
   {
     path: 'home',
     component: HomeComponent
   },
 
-  // Routes Patients (Lazy Loading)
+  // Patients (Lazy Loading)
   {
     path: 'patients',
-    loadComponent: () => import('./features/patients/patients').then(m => m.Patients)
+    loadComponent: () =>
+      import('./features/patients/patients').then(m => m.Patients)
   },
 
-  // Routes Doctors (Lazy Loading)
+  // Doctors (Lazy Loading)
   {
     path: 'doctors',
-    loadComponent: () => import('./features/doctors/doctors').then(m => m.Doctors)
+    loadComponent: () =>
+      import('./features/doctors/doctors').then(m => m.Doctors)
   },
 
-  // Routes RDV (Lazy Loading)
+  // RDV (Lazy Loading) ✅ CORRIGÉ
   {
     path: 'rdv',
-    loadComponent: () => import('./features/rdv/rdv').then(m => m.RDV)
+    loadComponent: () =>
+      import('./features/rdv/rdv').then(m => m.RdvComponent)
   },
 
-  // Page 404
+  // 404
   {
     path: '**',
     redirectTo: '/home'

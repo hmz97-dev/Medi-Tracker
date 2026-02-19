@@ -1,20 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RdvComponent } from './rdv';
 
-import { RDV } from './rdv';
-
-describe('RDV', () => {
-  let component: RDV;
-  let fixture: ComponentFixture<RDV>;
+describe('RdvComponent', () => {
+  let component: RdvComponent;
+  let fixture: ComponentFixture<RdvComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RDV]
-    })
-    .compileComponents();
+      imports: [RdvComponent]
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(RDV);
+    fixture = TestBed.createComponent(RdvComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {
