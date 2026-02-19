@@ -1,0 +1,6 @@
+# Symfony
+my_api/vendor/
+my_api/var/
+my_api/public/bundles/
+my_api/.env.local
+my_api/.phpunit.result.cache
