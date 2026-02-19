@@ -78,6 +78,19 @@ button:disabled {
   color: #516176;
 }
 
+.selected {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f4c81;
+}
+
+.message {
+  margin-top: 8px;
+  font-size: 0.86rem;
+  color: #1f3f5f;
+}
+
 .rdv-calendar {
   min-width: 0;
   border: 1px solid #d8dde6;

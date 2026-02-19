@@ -1,6 +1,7 @@
 <div class="rdv-page">
   <aside class="rdv-actions">
     <h2>{{ selectedRdvId ? 'Modifier RDV' : 'Nouveau RDV' }}</h2>
+    <p class="selected" *ngIf="selectedRdvId">RDV selectionne: #{{ selectedRdvId }}</p>
 
     <form class="rdv-form" (ngSubmit)="saveFromForm()">
       <label>
@@ -53,6 +54,7 @@
       Clique sur un creneau pour pre-remplir le formulaire. Clique sur un RDV pour le modifier.
       Drag and drop / resize restent actifs dans le calendrier.
     </p>
+    <p class="message" *ngIf="uiMessage">{{ uiMessage }}</p>
   </aside>
 
   <section class="rdv-calendar">

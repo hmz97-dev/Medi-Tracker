@@ -34,3 +34,36 @@ NOTE: Raw file sizes do not reflect development server per-request transformatio
   [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m4200[22m/[39m
   [32m➜[39m  [1mNetwork[22m: [36mhttp://10.2.101.103:[1m4200[22m/[39m
   [32m➜[39m  [1mNetwork[22m: [36mhttp://172.23.0.1:[1m4200[22m/[39m
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m[2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m [2m | [22m [36m7.62 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m[2m | [22m[1mRaw size[22m
+[32mchunk-LZRWAKRX.js[39m  [2m | [22m[2mrdv[22m  [2m | [22m[36m38.11 kB[39m[2m | [22m
+
+Application bundle generation complete. [2.959 seconds] - 2026-02-19T13:14:31.170Z
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m[2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m [2m | [22m [36m7.62 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m[2m | [22m[1mRaw size[22m
+[32mchunk-HB7ISR6K.js[39m  [2m | [22m[2mrdv[22m  [2m | [22m[36m39.42 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.576 seconds] - 2026-02-19T13:14:35.620Z
+
+Component update sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m[2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m [2m | [22m [36m7.62 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m[2m | [22m[1mRaw size[22m
+[32mchunk-XNE3NVCU.js[39m  [2m | [22m[2mrdv[22m  [2m | [22m[36m39.81 kB[39m[2m | [22m
+
+Application bundle generation complete. [0.588 seconds] - 2026-02-19T13:14:42.637Z
+
+Component update sent to client(s).

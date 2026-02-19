@@ -46,6 +46,7 @@ export class RdvComponent implements OnInit {
   patients: Patient[] = [];
   doctors: Doctor[] = [];
   selectedRdvId: number | null = null;
+  uiMessage = '';
 
   formModel: RdvFormModel = {
     id_patient: null,
@@ -130,14 +131,17 @@ export class RdvComponent implements OnInit {
   }
 
   deleteSelected(): void {
-    if (!this.selectedRdvId) {
+    const idToDelete = this.selectedRdvId ?? this.resolveRdvIdFromForm();
+    if (!idToDelete) {
+      this.uiMessage = 'Selectionne un RDV dans le calendrier avant de supprimer.';
       return;
     }
 
-    this.rdvService.deleteRDV(this.selectedRdvId).subscribe(() => {
-      this.appointments = this.appointments.filter((r) => r.id !== this.selectedRdvId);
+    this.rdvService.deleteRDV(idToDelete).subscribe(() => {
+      this.appointments = this.appointments.filter((r) => r.id !== idToDelete);
       this.rebuildEvents();
       this.resetForm();
+      this.uiMessage = 'RDV supprime.';
     });
   }
 
@@ -146,6 +150,7 @@ export class RdvComponent implements OnInit {
     const defaultDoctor = this.doctors.length > 0 ? this.doctors[0].id_doctor : null;
 
     this.selectedRdvId = null;
+    this.uiMessage = '';
     this.formModel = {
       id_patient: defaultPatient,
       id_doctor: defaultDoctor,
@@ -232,6 +237,7 @@ export class RdvComponent implements OnInit {
   private onSelect(arg: DateSelectArg): void {
     const defaultEnd = arg.end ?? new Date(arg.start.getTime() + 30 * 60 * 1000);
     this.selectedRdvId = null;
+    this.uiMessage = '';
     this.formModel = {
       ...this.formModel,
       appointment_date: this.toLocalDateTimeInput(arg.start),
@@ -247,6 +253,7 @@ export class RdvComponent implements OnInit {
     }
 
     this.selectedRdvId = id;
+    this.uiMessage = `RDV #${id} selectionne. Tu peux maintenant modifier ou supprimer.`;
     this.formModel = {
       id_patient: existing.id_patient,
       id_doctor: existing.id_doctor,
@@ -298,5 +305,20 @@ export class RdvComponent implements OnInit {
     const date = typeof dateLike === 'string' ? new Date(dateLike) : dateLike;
     const tzOffsetMs = date.getTimezoneOffset() * 60000;
     return new Date(date.getTime() - tzOffsetMs).toISOString().slice(0, 16);
+  }
+
+  private resolveRdvIdFromForm(): number | null {
+    if (!this.formModel.id_patient || !this.formModel.id_doctor || !this.formModel.appointment_date) {
+      return null;
+    }
+
+    const startIso = new Date(this.formModel.appointment_date).toISOString();
+    const match = this.appointments.find((r) =>
+      r.id_patient === this.formModel.id_patient &&
+      r.id_doctor === this.formModel.id_doctor &&
+      r.appointment_date === startIso
+    );
+
+    return match?.id ?? null;
   }
 }
