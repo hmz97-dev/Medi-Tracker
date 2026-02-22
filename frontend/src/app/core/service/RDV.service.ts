@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, delay, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { RDV } from '../../models/RDV.model';
 import { environment } from '../../../environments/environment';
 
@@ -10,117 +11,111 @@ import { environment } from '../../../environments/environment';
 export class RDVService {
   private apiUrl = `${environment.apiUrl}/rdvs`;
 
-  // Optionnel: mode mock (désactivé par défaut)
-  private useMockData = false;
-  private readonly storageKey = 'meditracker-rdvs';
-  private mockAppointments: RDV[] = this.useMockData ? this.loadAppointments() : [];
-
   constructor(private http: HttpClient) {}
 
-  private loadAppointments(): RDV[] {
-    const raw = localStorage.getItem(this.storageKey);
-    if (!raw) {
-      return [];
-    }
-
-    try {
-      const parsed = JSON.parse(raw) as RDV[];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  }
-
-  private saveAppointments(items: RDV[]): void {
-    localStorage.setItem(this.storageKey, JSON.stringify(items));
-  }
-
   getRDV(): Observable<RDV[]> {
-    if (this.useMockData) {
-      return of([...this.mockAppointments]).pipe(delay(120));
-    }
-    return this.http.get<RDV[]>(this.apiUrl);
+    return this.http.get<any[]>(this.apiUrl).pipe(
+      map((rdvs) => rdvs.map((rdv) => this.fromApiRdv(rdv)))
+    );
   }
 
   getRDVByPatient(patientId: number): Observable<RDV[]> {
-    if (this.useMockData) {
-      const filtered = this.mockAppointments.filter((a) => a.id_patient === patientId);
-      return of(filtered).pipe(delay(120));
-    }
-    return this.http.get<RDV[]>(`${this.apiUrl}/patient/${patientId}`);
+    return this.http.get<any[]>(`${environment.apiUrl}/patients/${patientId}/rdvs`).pipe(
+      map((rdvs) => rdvs.map((rdv) => this.fromApiRdv(rdv)))
+    );
   }
 
   getRDVByDoctor(doctorId: number): Observable<RDV[]> {
-    if (this.useMockData) {
-      const filtered = this.mockAppointments.filter((a) => a.id_doctor === doctorId);
-      return of(filtered).pipe(delay(120));
-    }
-    return this.http.get<RDV[]>(`${this.apiUrl}/doctor/${doctorId}`);
+    return this.http.get<any[]>(`${environment.apiUrl}/doctors/${doctorId}/rdvs`).pipe(
+      map((rdvs) => rdvs.map((rdv) => this.fromApiRdv(rdv)))
+    );
   }
 
   createRDV(appointment: RDV): Observable<RDV> {
-    if (this.useMockData) {
-      const currentMaxId =
-        this.mockAppointments.length > 0 ? Math.max(...this.mockAppointments.map((a) => a.id)) : 0;
-      const newAppointment = { ...appointment, id: currentMaxId + 1 };
-      this.mockAppointments.push(newAppointment);
-      this.saveAppointments(this.mockAppointments);
-      return of(newAppointment).pipe(delay(120));
-    }
-    return this.http.post<RDV>(this.apiUrl, appointment);
+    return this.http.post<any>(this.apiUrl, this.toApiRdv(appointment)).pipe(
+      map((response) => this.fromApiRdv(response.rdv ?? response))
+    );
   }
 
   updateRDV(appointment: RDV): Observable<RDV> {
-    if (this.useMockData) {
-      const index = this.mockAppointments.findIndex((a) => a.id === appointment.id);
-      if (index !== -1) {
-        this.mockAppointments[index] = appointment;
-        this.saveAppointments(this.mockAppointments);
-      }
-      return of(appointment).pipe(delay(120));
-    }
-    return this.http.put<RDV>(`${this.apiUrl}/${appointment.id}`, appointment);
+    return this.http.put<any>(`${this.apiUrl}/${appointment.id}`, this.toApiRdv(appointment)).pipe(
+      map((response) => this.fromApiRdv(response.rdv ?? response))
+    );
   }
 
   cancelRDV(id: number): Observable<void> {
-    if (this.useMockData) {
-      const index = this.mockAppointments.findIndex((a) => a.id === id);
-      if (index !== -1) {
-        this.mockAppointments[index].status = 'cancelled';
-        this.saveAppointments(this.mockAppointments);
-      }
-      return of(void 0).pipe(delay(120));
-    }
-    return this.http.patch<void>(`${this.apiUrl}/${id}/cancel`, {});
+    return this.http.put<void>(`${this.apiUrl}/${id}`, { status: 'cancelled' });
   }
 
   deleteRDV(id: number): Observable<void> {
-    if (this.useMockData) {
-      const index = this.mockAppointments.findIndex((a) => a.id === id);
-      if (index !== -1) {
-        this.mockAppointments.splice(index, 1);
-        this.saveAppointments(this.mockAppointments);
-      }
-      return of(void 0).pipe(delay(120));
-    }
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
   getAvailableSlots(doctorId: number, date: string): Observable<string[]> {
-    if (this.useMockData) {
-      const allSlots = [
-        '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-        '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00'
-      ];
+    return this.getRDVByDoctor(doctorId).pipe(
+      map((rdvs) => {
+        const allSlots = [
+          '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+          '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00'
+        ];
 
-      const bookedSlots = this.mockAppointments
-        .filter((a) => a.id_doctor === doctorId && a.appointment_date.startsWith(date))
-        .map((a) => a.appointment_date.substring(11, 16));
+        const bookedSlots = rdvs
+          .filter((rdv) => rdv.appointment_date.startsWith(date))
+          .map((rdv) => rdv.appointment_date.substring(11, 16));
 
-      return of(allSlots.filter((slot) => !bookedSlots.includes(slot))).pipe(delay(120));
-    }
+        return allSlots.filter((slot) => !bookedSlots.includes(slot));
+      })
+    );
+  }
 
-    const params = new HttpParams().set('doctorId', doctorId).set('date', date);
-    return this.http.get<string[]>(`${this.apiUrl}/available`, { params });
+  private fromApiRdv(rdv: any): RDV {
+    const doctorId = rdv.doctorId ?? rdv.doctor?.id ?? 0;
+    const patientId = rdv.patientId ?? rdv.patient?.id ?? 0;
+
+    return {
+      id: rdv.id,
+      appointment_date: rdv.dateRdv,
+      end_date: rdv.dateRdv,
+      status: rdv.status,
+      reason: rdv.reason,
+      id_doctor: doctorId,
+      id_patient: patientId,
+      doctor: rdv.doctor
+        ? {
+            id_doctor: rdv.doctor.id,
+            first_name: rdv.doctor.firstName,
+            last_name: rdv.doctor.lastName,
+            email: '',
+            phone: '',
+            speciality: rdv.doctor.speciality,
+            description: ''
+          }
+        : undefined,
+      patient: rdv.patient
+        ? {
+            id_patient: rdv.patient.id,
+            first_name: rdv.patient.firstName,
+            last_name: rdv.patient.lastName,
+            email: '',
+            phone: '',
+            date_of_birth: new Date(),
+            gender: '',
+            blood_group: rdv.patient.bloodGroup,
+            description: ''
+          }
+        : undefined
+    };
+  }
+
+  private toApiRdv(appointment: RDV): any {
+    const dateRdv = appointment.appointment_date.slice(0, 10);
+
+    return {
+      dateRdv,
+      reason: appointment.reason,
+      status: appointment.status,
+      doctorId: appointment.id_doctor,
+      patientId: appointment.id_patient
+    };
   }
 }

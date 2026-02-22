@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Sideware } from '../sideware/sideware';
+import { PatientService } from '../../core/service/patient.service';
+import { Patient as PatientModel } from '../../models/patient.model';
 
 type MedicalStatus = 'Recovered' | 'Awaiting surgery' | 'On treatment';
 type StatusFilter = 'All' | MedicalStatus;
@@ -33,7 +35,9 @@ type SortDirection = 'asc' | 'desc';
 	templateUrl: './patient.html',
 	styleUrl: './patient.scss'
 })
-export class Patient {
+export class Patient implements OnInit {
+	constructor(private patientService: PatientService) {}
+
 	readonly filters: StatusFilter[] = ['All', 'Recovered', 'Awaiting surgery', 'On treatment'];
 	readonly pageSize = 15;
 
@@ -51,16 +55,11 @@ export class Patient {
 
 	newPatient: NewPatientForm = this.emptyForm();
 
-	rows: PatientRow[] = [
-		{ id: 1, name: 'Mary Joseph', diagnosis: 'Malaria', status: 'Recovered', lastAppointment: '20/10/2022', nextAppointment: '1/12/2022' },
-		{ id: 2, name: 'Amala Jones', diagnosis: 'Stroke', status: 'Awaiting surgery', lastAppointment: '11/10/2022', nextAppointment: '1/12/2022' },
-		{ id: 3, name: 'Damilola Oyin', diagnosis: 'Liver failure', status: 'On treatment', lastAppointment: '9/10/2022', nextAppointment: '1/11/2022' },
-		{ id: 4, name: 'Selim Jubril', diagnosis: 'Typhoid', status: 'Awaiting surgery', lastAppointment: '12/10/2022', nextAppointment: '2/12/2022' },
-		{ id: 5, name: 'Paul Christian', diagnosis: 'Gonorrhea', status: 'On treatment', lastAppointment: '22/10/2022', nextAppointment: '3/12/2022' },
-		{ id: 6, name: 'Rosabel Briggs', diagnosis: 'Malaria', status: 'Recovered', lastAppointment: '23/10/2022', nextAppointment: '4/12/2022' },
-		{ id: 7, name: 'Tina Adekeye', diagnosis: 'Syphilis', status: 'Recovered', lastAppointment: '19/10/2022', nextAppointment: '5/12/2022' },
-		{ id: 8, name: 'Mark Bossman', diagnosis: 'Malaria', status: 'Recovered', lastAppointment: '17/10/2022', nextAppointment: '2/12/2022' }
-	];
+	rows: PatientRow[] = [];
+
+	ngOnInit(): void {
+		this.loadPatients();
+	}
 
 	get totalPatients(): number {
 		return this.rows.length;
@@ -203,11 +202,13 @@ export class Patient {
 	}
 
 	deleteRow(rowId: number): void {
-		this.rows = this.rows.filter((row) => row.id !== rowId);
-		this.openedMenuId = null;
-		if (this.currentPage > this.totalPages) {
-			this.currentPage = this.totalPages;
-		}
+		this.patientService.deletePatient(rowId).subscribe(() => {
+			this.rows = this.rows.filter((row) => row.id !== rowId);
+			this.openedMenuId = null;
+			if (this.currentPage > this.totalPages) {
+				this.currentPage = this.totalPages;
+			}
+		});
 	}
 
 	cycleStatus(rowId: number): void {
@@ -235,23 +236,35 @@ export class Patient {
 			return;
 		}
 
-		const nextId = Math.max(...this.rows.map((row) => row.id), 0) + 1;
-		this.rows = [
-			{
-				id: nextId,
-				name: form.name.trim(),
-				diagnosis: form.diagnosis.trim(),
-				status: form.status,
-				lastAppointment: form.lastAppointment.trim(),
-				nextAppointment: form.nextAppointment.trim()
-			},
-			...this.rows
-		];
+		const nameParts = form.name.trim().split(' ').filter(Boolean);
+		const firstName = nameParts[0] ?? 'Patient';
+		const lastName = nameParts.slice(1).join(' ') || 'Nouveau';
+		const emailBase = `${firstName}.${lastName}`.replace(/\s+/g, '.').toLowerCase();
 
-		this.currentPage = 1;
-		this.showAddForm = false;
-		this.newPatient = this.emptyForm();
-		this.feedbackMessage = 'Patient ajouté avec succès.';
+		const payload: PatientModel = {
+			id_patient: 0,
+			first_name: firstName,
+			last_name: lastName,
+			email: `${emailBase}.${Date.now()}@meditracker.local`,
+			phone: '',
+			date_of_birth: new Date('1990-01-01'),
+			gender: 'N/A',
+			blood_group: 'O+',
+			description: form.diagnosis.trim()
+		};
+
+		this.patientService.createPatient(payload).subscribe((created) => {
+			const createdRow = this.mapPatientToRow(created);
+			createdRow.status = form.status;
+			createdRow.lastAppointment = form.lastAppointment.trim();
+			createdRow.nextAppointment = form.nextAppointment.trim();
+
+			this.rows = [createdRow, ...this.rows];
+			this.currentPage = 1;
+			this.showAddForm = false;
+			this.newPatient = this.emptyForm();
+			this.feedbackMessage = 'Patient ajouté avec succès.';
+		});
 	}
 
 	@HostListener('document:click', ['$event'])
@@ -280,6 +293,26 @@ export class Patient {
 			status: 'On treatment',
 			lastAppointment: '',
 			nextAppointment: ''
+		};
+	}
+
+	private loadPatients(): void {
+		this.patientService.getPatients().subscribe((patients) => {
+			this.rows = patients.map((patient) => this.mapPatientToRow(patient));
+			if (this.currentPage > this.totalPages) {
+				this.currentPage = this.totalPages;
+			}
+		});
+	}
+
+	private mapPatientToRow(patient: PatientModel): PatientRow {
+		return {
+			id: patient.id_patient,
+			name: `${patient.first_name} ${patient.last_name}`,
+			diagnosis: patient.description?.trim() ? patient.description : '-',
+			status: 'On treatment',
+			lastAppointment: '-',
+			nextAppointment: '-'
 		};
 	}
 }
