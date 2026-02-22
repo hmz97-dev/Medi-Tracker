@@ -1,59 +1,121 @@
-# Frontend
+# Frontend Medi-Tracker (Angular)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.4.
+Interface utilisateur de Medi-Tracker.
 
-## Development server
+---
 
-To start a local development server, run:
+## Stack
 
-```bash
-ng serve
-```
+- Angular 21 (standalone components)
+- Angular Router
+- Angular HttpClient
+- FullCalendar (gestion des RDV)
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Démarrage
 
 ```bash
-ng generate --help
+npm install
+npm start
 ```
 
-## Building
+Application disponible sur : `http://localhost:4200`
 
-To build the project run:
+---
+
+## Scripts
+
+- `npm start` : serveur de développement
+- `npm run build` : build de production
+- `npm run watch` : build en watch mode
+- `npm test` : tests
+
+---
+
+## Intégration API
+
+L'URL API est définie dans :
+
+- `src/environments/environment.ts`
+
+Valeur actuelle (dev) :
+
+```ts
+apiUrl: 'http://localhost:8000/api'
+```
+
+---
+
+## Authentification côté frontend
+
+### Implémentation
+
+- Service auth : `src/app/core/auth/auth.service.ts`
+- Interceptor JWT : `src/app/core/auth/auth.interceptor.ts`
+- Guard de routes : `src/app/core/auth/auth.guard.ts`
+- Page login/register : `src/app/features/auth/login.ts`
+
+### Fonctionnement
+
+1. L'utilisateur se connecte / s'inscrit via `/api/auth/*`
+2. Le token JWT est stocké en localStorage
+3. L'interceptor ajoute le header `Authorization: Bearer <token>`
+4. Le guard empêche l'accès aux routes protégées sans token
+
+---
+
+## Routes principales
+
+- `/login`
+- `/home` (protégée)
+- `/patient` (protégée)
+- `/doctors` (protégée)
+- `/rdv` (protégée)
+
+---
+
+## Structure utile
+
+```text
+src/app/
+├─ core/
+│  ├─ auth/
+│  └─ service/
+├─ features/
+│  ├─ auth/
+│  ├─ doctors/
+│  ├─ patient/
+│  ├─ rdv/
+│  └─ home/
+└─ models/
+```
+
+---
+
+## Notes de développement
+
+- Les appels HTTP utilisent les services dans `core/service`
+- Les mocks ont été retirés, l'app utilise les vraies données backend
+- Si l'API renvoie `401`, vérifier le token ou refaire un login
+
+---
+
+## Dépannage rapide
+
+### Erreur CORS
+
+Vérifier que le backend autorise `http://localhost:4200` dans `my_api/.env` (`CORS_ALLOW_ORIGINS`).
+
+### API inaccessible
+
+Vérifier que Symfony tourne sur `http://127.0.0.1:8000`.
+
+### Build en erreur après pull
+
+Relancer :
 
 ```bash
-ng build
+npm install
+npm run build
 ```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
