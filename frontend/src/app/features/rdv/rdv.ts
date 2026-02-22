@@ -15,6 +15,7 @@ import { forkJoin } from 'rxjs';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import { Sideware } from '../sideware/sideware';
 import { DoctorService } from '../../core/service/doctor.service';
 import { RDVService } from '../../core/service/RDV.service';
 import { PatientService } from '../../core/service/patient.service';
@@ -33,7 +34,7 @@ type RdvFormModel = {
 @Component({
   selector: 'app-rdv',
   standalone: true,
-  imports: [CommonModule, FormsModule, FullCalendarModule],
+  imports: [CommonModule, FormsModule, FullCalendarModule, Sideware],
   templateUrl: './rdv.html',
   styleUrls: ['./rdv.scss']
 })

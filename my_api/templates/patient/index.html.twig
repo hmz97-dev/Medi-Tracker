@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Patient index{% endblock %}
+
+{% block body %}
+    <h1>Patient index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>FirstName</th>
+                <th>LastName</th>
+                <th>DateNaissance</th>
+                <th>Gender</th>
+                <th>Email</th>
+                <th>Description</th>
+                <th>Adress</th>
+                <th>BloodGroup</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for patient in patients %}
+            <tr>
+                <td>{{ patient.id }}</td>
+                <td>{{ patient.FirstName }}</td>
+                <td>{{ patient.LastName }}</td>
+                <td>{{ patient.dateNaissance ? patient.dateNaissance|date('Y-m-d') : '' }}</td>
+                <td>{{ patient.Gender }}</td>
+                <td>{{ patient.Email }}</td>
+                <td>{{ patient.Description }}</td>
+                <td>{{ patient.Adress }}</td>
+                <td>{{ patient.BloodGroup }}</td>
+                <td>
+                    <a href="{{ path('app_patient_show', {'id': patient.id}) }}">show</a>
+                    <a href="{{ path('app_patient_edit', {'id': patient.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="10">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_patient_new') }}">Create new</a>
+{% endblock %}
