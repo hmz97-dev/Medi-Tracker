@@ -2,8 +2,8 @@
 	display: grid;
 	grid-template-columns: 220px 1fr;
 	min-height: 100vh;
-	background: #f4f5f8;
-	color: #1f2a3a;
+	background: var(--app-bg);
+	color: var(--text);
 }
 
 .content {
@@ -12,8 +12,8 @@
 
 .register-card {
 	margin: 0.8rem;
-	background: #f7f8fb;
-	border: 1px solid #ebeff5;
+	background: var(--surface);
+	border: 1px solid var(--border);
 	border-radius: 10px;
 	padding: 0.8rem;
 }
@@ -21,7 +21,7 @@
 .section-title {
 	margin: 0.1rem 0 0.8rem;
 	font-size: 0.85rem;
-	color: #5f6f87;
+	color: var(--text-muted);
 }
 
 .feedback {
@@ -157,8 +157,8 @@
 }
 
 .toolbar {
-	background: #ffffff;
-	border: 1px solid #ebeff5;
+	background: var(--surface);
+	border: 1px solid var(--border);
 	border-radius: 8px;
 	padding: 0.55rem 0.7rem;
 	display: flex;
@@ -172,7 +172,7 @@
 }
 
 .toolbar h2 span {
-	color: #7d8da6;
+	color: var(--text-muted);
 	font-weight: 500;
 	font-size: 1rem;
 }
@@ -224,8 +224,8 @@
 
 .table-wrap {
 	margin-top: 0.65rem;
-	background: #ffffff;
-	border: 1px solid #ebeff5;
+	background: var(--surface);
+	border: 1px solid var(--border);
 	border-radius: 8px;
 	overflow: hidden;
 }

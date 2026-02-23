@@ -6,9 +6,8 @@
 
 .doctor-container {
   padding: 30px;
-  background: #f5f7fa;
+  background: var(--app-bg);
   min-height: 100vh;
-  font-family: 'Segoe UI', sans-serif;
 }
 
 
@@ -27,11 +26,11 @@
 }
 
 .subtitle {
-  color: #777;
+  color: var(--text-muted);
 }
 
 .btn-primary {
-  background: #2f6fed;
+  background: var(--primary);
   color: white;
   border: none;
   padding: 10px 18px;
@@ -41,7 +40,7 @@
 }
 
 .btn-primary:hover {
-  background: #1f5ad1;
+  background: var(--primary-hover);
 }
 
 
@@ -54,16 +53,16 @@
 }
 
 .stat-card {
-  background: white;
+  background: var(--surface);
   padding: 20px;
   border-radius: 12px;
   flex: 1;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  border: 1px solid var(--border);
 }
 
 .label {
   font-size: 12px;
-  color: gray;
+  color: var(--text-muted);
   margin-bottom: 8px;
 }
 
@@ -71,10 +70,10 @@
 /* CARD */
 
 .card {
-  background: white;
+  background: var(--surface);
   padding: 25px;
   border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  border: 1px solid var(--border);
 }
 
 .card h2 {
@@ -92,7 +91,7 @@
 
 .info label {
   font-weight: bold;
-  color: #555;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
@@ -117,7 +116,7 @@
   width: 100%;
   padding: 8px;
   border-radius: 6px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border);
 }
 
 textarea {
@@ -128,7 +127,7 @@ textarea {
 .btn-save {
   grid-column: span 2;
   margin-top: 10px;
-  background: #2f6fed;
+  background: var(--primary);
   color: white;
   border: none;
   padding: 10px;
