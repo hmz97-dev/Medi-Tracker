@@ -3,51 +3,32 @@ import { HomeComponent } from './features/home/home.component';
 import { authGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
-  // Page d'accueil
-  {
-    path: '',
-    redirectTo: '/login',
-    pathMatch: 'full'
-  },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
 
   {
     path: 'login',
-    loadComponent: () => import('./features/auth/login').then(m => m.LoginComponent)
+    loadComponent: () => import('./features/auth/login').then(m => m.LoginComponent),
   },
 
-  // Home
-  {
-    path: 'home',
-    component: HomeComponent,
-    canActivate: [authGuard]
-  },
+  { path: 'home', component: HomeComponent, canActivate: [authGuard] },
 
-  // Route Patient (Lazy Loading)
   {
     path: 'patient',
     loadComponent: () => import('./features/patient/patient').then(m => m.Patient),
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
 
-  // Doctors (Lazy Loading)
   {
     path: 'doctors',
-    loadComponent: () =>
-      import('./features/doctors/doctors').then(m => m.Doctors),
-    canActivate: [authGuard]
+    loadComponent: () => import('./features/doctors/doctors').then(m => m.Doctors),
+    canActivate: [authGuard],
   },
 
-  // RDV (Lazy Loading) ✅ CORRIGÉ
+  // RDV PUBLIC TEMPORAIRE (sans authGuard)
   {
     path: 'rdv',
-    loadComponent: () =>
-      import('./features/rdv/rdv').then(m => m.RdvComponent),
-    canActivate: [authGuard]
+    loadComponent: () => import('./features/rdv/rdv').then(m => m.RdvComponent),
   },
 
-  // 404
-  {
-    path: '**',
-    redirectTo: '/login'
-  }
+  { path: '**', redirectTo: '/login' },
 ];

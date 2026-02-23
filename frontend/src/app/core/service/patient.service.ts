@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Patient } from '../../models/patient.model';
@@ -15,25 +15,25 @@ export class PatientService {
 
   getPatients(): Observable<Patient[]> {
     return this.http.get<any[]>(this.apiUrl).pipe(
-      map((patients) => patients.map((patient) => this.fromApiPatient(patient)))
+      map((patients) => patients.map((p) => this.fromApiPatient(p)))
     );
   }
 
   getPatientById(id: number): Observable<Patient> {
     return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
-      map((patient) => this.fromApiPatient(patient))
+      map((p) => this.fromApiPatient(p))
     );
   }
 
   createPatient(patient: Patient): Observable<Patient> {
     return this.http.post<any>(this.apiUrl, this.toApiPatient(patient)).pipe(
-      map((response) => this.fromApiPatient(response.patient ?? response))
+      map((res) => this.fromApiPatient(res.patient ?? res))
     );
   }
 
   updatePatient(patient: Patient): Observable<Patient> {
     return this.http.put<any>(`${this.apiUrl}/${patient.id_patient}`, this.toApiPatient(patient)).pipe(
-      map((response) => this.fromApiPatient(response.patient ?? response))
+      map((res) => this.fromApiPatient(res.patient ?? res))
     );
   }
 
@@ -41,45 +41,37 @@ export class PatientService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  searchPatients(term: string): Observable<Patient[]> {
-    const params = new HttpParams().set('q', term.toLowerCase());
-    return this.getPatients().pipe(
-      map((patients) =>
-        patients.filter((patient) =>
-          `${patient.first_name} ${patient.last_name}`.toLowerCase().includes(params.get('q') ?? '')
-        )
-      )
-    );
-  }
+  // -------------------------
+  // MAPPERS
+  // -------------------------
+  private fromApiPatient(p: any): Patient {
+    // Si l'API fournit dateOfBirth/date_of_birth on le lit, sinon valeur par défaut
+    const dobRaw = p.dateOfBirth ?? p.date_of_birth ?? null;
+    const dob = dobRaw ? new Date(dobRaw) : new Date('1990-01-01');
 
-  private fromApiPatient(patient: any): Patient {
     return {
-      id_patient: patient.id,
-      first_name: patient.firstName,
-      last_name: patient.lastName,
-      email: patient.email,
-      phone: '',
-      date_of_birth: patient.dateNaissance ? new Date(patient.dateNaissance) : new Date(),
-      gender: patient.gender,
-      blood_group: patient.bloodGroup,
-      description: patient.description
+      id_patient: p.id,
+      first_name: p.firstName,
+      last_name: p.lastName,
+      email: p.email ?? '',
+      phone: p.phoneNumber ?? '',
+      blood_group: p.bloodGroup ?? '',
+      gender: p.gender ?? '',
+      date_of_birth: dob
     };
   }
 
   private toApiPatient(patient: Patient): any {
-    const dateOfBirth = patient.date_of_birth instanceof Date
-      ? patient.date_of_birth
-      : new Date(patient.date_of_birth);
-
     return {
       firstName: patient.first_name,
       lastName: patient.last_name,
-      dateNaissance: dateOfBirth.toISOString().slice(0, 10),
-      gender: patient.gender,
       email: patient.email,
-      description: patient.description ?? '',
-      adress: '',
-      bloodGroup: patient.blood_group
+      phoneNumber: patient.phone,
+      bloodGroup: patient.blood_group,
+      gender: patient.gender,
+      dateOfBirth: patient.date_of_birth
+        ? new Date(patient.date_of_birth).toISOString().slice(0, 10)
+        : null
     };
   }
 }

@@ -15,19 +15,17 @@ import { forkJoin } from 'rxjs';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid';
+
 import { Sideware } from '../sideware/sideware';
 import { DoctorService } from '../../core/service/doctor.service';
-import { RDVService } from '../../core/service/RDV.service';
+import { RDVService, ApiRDV, ApiDoctor, ApiPatient } from '../../core/service/RDV.service';
 import { PatientService } from '../../core/service/patient.service';
-import { Doctor } from '../../models/doctor.model';
-import { Patient } from '../../models/patient.model';
-import { RDV } from '../../models/RDV.model';
 
 type RdvFormModel = {
-  id_patient: number | null;
-  id_doctor: number | null;
-  appointment_date: string;
-  end_date: string;
+  patientId: number | null;
+  doctorId: number | null;
+  start: string; // datetime-local
+  end: string;   // datetime-local
   reason: string;
 };
 
@@ -40,28 +38,21 @@ type RdvFormModel = {
 })
 export class RdvComponent implements OnInit {
   private events: EventInput[] = [];
-  private appointments: RDV[] = [];
-  private patientNames = new Map<number, string>();
-  private doctorNames = new Map<number, string>();
+  private appointments: ApiRDV[] = [];
 
-  patients: Patient[] = [];
-  doctors: Doctor[] = [];
+  patients: ApiPatient[] = [];
+  doctors: ApiDoctor[] = [];
+
   selectedRdvId: number | null = null;
   uiMessage = '';
 
   formModel: RdvFormModel = {
-    id_patient: null,
-    id_doctor: null,
-    appointment_date: '',
-    end_date: '',
+    patientId: null,
+    doctorId: null,
+    start: '',
+    end: '',
     reason: ''
   };
-
-  constructor(
-    private rdvService: RDVService,
-    private patientService: PatientService,
-    private doctorService: DoctorService
-  ) {}
 
   calendarOptions: CalendarOptions = {
     plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
@@ -78,248 +69,241 @@ export class RdvComponent implements OnInit {
     allDaySlot: false,
     slotMinTime: '06:00:00',
     slotMaxTime: '20:00:00',
-    events: this.events,
+    events: [],
     select: (arg) => this.onSelect(arg),
     eventClick: (arg) => this.onEventClick(arg),
     eventDrop: (arg) => this.onEventDrop(arg),
     eventResize: (arg) => this.onEventResize(arg)
   };
 
+  constructor(
+    private rdvService: RDVService,
+    private patientService: PatientService,
+    private doctorService: DoctorService
+  ) {}
+
   ngOnInit(): void {
-    this.bootstrapData();
+    this.loadAll();
   }
 
-  canSubmitForm(): boolean {
-    return Boolean(
-      this.formModel.id_patient &&
-      this.formModel.id_doctor &&
-      this.formModel.appointment_date &&
-      this.formModel.end_date
-    );
-  }
-
-  saveFromForm(): void {
-    if (!this.canSubmitForm()) {
-      return;
-    }
-
-    const start = new Date(this.formModel.appointment_date);
-    const end = new Date(this.formModel.end_date);
-    if (!(start < end)) {
-      return;
-    }
-
-    if (this.selectedRdvId) {
-      this.updateSelectedRdv();
-      return;
-    }
-
-    const newRdv: RDV = {
-      id: 0,
-      id_patient: this.formModel.id_patient as number,
-      id_doctor: this.formModel.id_doctor as number,
-      appointment_date: start.toISOString(),
-      end_date: end.toISOString(),
-      status: 'scheduled',
-      reason: this.formModel.reason || 'Consultation'
-    };
-
-    this.rdvService.createRDV(newRdv).subscribe((created) => {
-      this.appointments.push(created);
-      this.rebuildEvents();
-      this.selectedRdvId = created.id;
-    });
-  }
-
-  deleteSelected(): void {
-    const idToDelete = this.selectedRdvId ?? this.resolveRdvIdFromForm();
-    if (!idToDelete) {
-      this.uiMessage = 'Selectionne un RDV dans le calendrier avant de supprimer.';
-      return;
-    }
-
-    this.rdvService.deleteRDV(idToDelete).subscribe(() => {
-      this.appointments = this.appointments.filter((r) => r.id !== idToDelete);
-      this.rebuildEvents();
-      this.resetForm();
-      this.uiMessage = 'RDV supprime.';
-    });
-  }
-
-  resetForm(): void {
-    const defaultPatient = this.patients.length > 0 ? this.patients[0].id_patient : null;
-    const defaultDoctor = this.doctors.length > 0 ? this.doctors[0].id_doctor : null;
-
-    this.selectedRdvId = null;
-    this.uiMessage = '';
-    this.formModel = {
-      id_patient: defaultPatient,
-      id_doctor: defaultDoctor,
-      appointment_date: '',
-      end_date: '',
-      reason: ''
-    };
-  }
-
-  private updateSelectedRdv(): void {
-    if (!this.selectedRdvId) {
-      return;
-    }
-
-    const existing = this.appointments.find((r) => r.id === this.selectedRdvId);
-    if (!existing) {
-      return;
-    }
-
-    const updated: RDV = {
-      ...existing,
-      id_patient: this.formModel.id_patient as number,
-      id_doctor: this.formModel.id_doctor as number,
-      appointment_date: new Date(this.formModel.appointment_date).toISOString(),
-      end_date: new Date(this.formModel.end_date).toISOString(),
-      reason: this.formModel.reason || existing.reason
-    };
-
-    this.rdvService.updateRDV(updated).subscribe(() => {
-      this.appointments = this.appointments.map((r) => (r.id === updated.id ? updated : r));
-      this.rebuildEvents();
-    });
-  }
-
-  private bootstrapData(): void {
+  private loadAll(): void {
     forkJoin({
       patients: this.patientService.getPatients(),
-      doctors: this.doctorService.getDoctors(),
-      appointments: this.rdvService.getRDV()
-    }).subscribe(({ patients, doctors, appointments }) => {
-      this.patients = patients;
-      this.doctors = doctors;
-      this.patientNames = new Map(
-        patients.map((p) => [p.id_patient, `${p.first_name} ${p.last_name}`])
-      );
-      this.doctorNames = new Map(
-        doctors.map((d) => [d.id_doctor, `Dr ${d.last_name}`])
-      );
-      this.appointments = appointments;
-      this.resetForm();
-      this.rebuildEvents();
+      doctors: this.doctorService.getDoctors() as any, // ton DoctorService retourne Doctor[] (mapping), ok
+      rdvs: this.rdvService.getRDV()
+    }).subscribe({
+      next: ({ patients, doctors, rdvs }) => {
+        // Patients = API patient
+        this.patients = patients as any;
+
+        // Doctors: ton DoctorService mappe vers Doctor model (id_doctor/first_name/last_name)
+        // Donc on remap ici vers ApiDoctor format (id/firstName/lastName) pour simplifier RDV
+        this.doctors = (doctors as any[]).map(d => ({
+          id: d.id_doctor ?? d.id,
+          firstName: d.first_name ?? d.firstName,
+          lastName: d.last_name ?? d.lastName,
+          speciality: d.speciality
+        }));
+
+        this.appointments = rdvs;
+        this.resetForm();
+        this.rebuildEvents();
+      },
+      error: (e) => {
+        console.error(e);
+        this.uiMessage = 'Erreur chargement données.';
+      }
     });
   }
 
   private rebuildEvents(): void {
-    this.events = this.appointments.map((rdv) => this.toCalendarEvent(rdv));
-    this.refreshCalendarEvents();
-  }
-
-  private toCalendarEvent(rdv: RDV): EventInput {
-    const start = new Date(rdv.appointment_date);
-    const end = rdv.end_date
-      ? new Date(rdv.end_date)
-      : new Date(start.getTime() + 30 * 60 * 1000);
-
-    return {
-      id: String(rdv.id),
-      title: this.buildTitle(rdv.id_patient, rdv.id_doctor),
-      start,
-      end
-    };
-  }
-
-  private buildTitle(patientId: number, doctorId: number): string {
-    const patient = this.patientNames.get(patientId) ?? `Patient #${patientId}`;
-    const doctor = this.doctorNames.get(doctorId) ?? `Dr #${doctorId}`;
-    return `${patient} - ${doctor}`;
-  }
-
-  private refreshCalendarEvents(): void {
+    this.events = this.appointments.map(r => this.toEvent(r));
     this.calendarOptions = { ...this.calendarOptions, events: [...this.events] };
   }
 
+  private toEvent(rdv: ApiRDV): EventInput {
+    // API donne date seulement => 09:00 -> 10:00 par défaut
+    const start = this.makeDate(rdv.dateRdv, 9, 0);
+    const end = this.makeDate(rdv.dateRdv, 10, 0);
+
+    return {
+      id: String(rdv.id),
+      start,
+      end,
+      title: this.title(rdv, start, end)
+    };
+  }
+
+  private title(rdv: ApiRDV, start: Date, end: Date): string {
+    const fmt = (d: Date) => d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    const p = `${rdv.patient.firstName} ${rdv.patient.lastName}`;
+    const d = `Dr ${rdv.doctor.firstName} ${rdv.doctor.lastName}`;
+    return `${fmt(start)} - ${fmt(end)} - ${p} - ${d}`;
+  }
+
+  private makeDate(dateRdv: string, h: number, m: number): Date {
+    if (dateRdv.includes('T')) return new Date(dateRdv);
+    const [Y, M, D] = dateRdv.split('-').map(Number);
+    return new Date(Y, M - 1, D, h, m, 0);
+  }
+
+  private toLocalInput(date: Date): string {
+    const tzOffsetMs = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - tzOffsetMs).toISOString().slice(0, 16);
+  }
+
+  canSubmitForm(): boolean {
+    return !!(this.formModel.patientId && this.formModel.doctorId && this.formModel.start && this.formModel.end);
+  }
+
+  resetForm(): void {
+    this.selectedRdvId = null;
+    this.uiMessage = '';
+
+    this.formModel = {
+      patientId: this.patients[0]?.id ?? null,
+      doctorId: this.doctors[0]?.id ?? null,
+      start: '',
+      end: '',
+      reason: ''
+    };
+  }
+
+  saveFromForm(): void {
+    this.uiMessage = '';
+
+    if (!this.canSubmitForm()) {
+      this.uiMessage = 'Remplis patient, médecin, début et fin.';
+      return;
+    }
+
+    const start = new Date(this.formModel.start);
+    const end = new Date(this.formModel.end);
+    if (!(start < end)) {
+      this.uiMessage = 'Fin doit être après début.';
+      return;
+    }
+
+    const patient = this.patients.find(p => p.id === this.formModel.patientId);
+    const doctor = this.doctors.find(d => d.id === this.formModel.doctorId);
+
+    if (!patient || !doctor) {
+      this.uiMessage = 'Patient ou médecin invalide.';
+      return;
+    }
+
+    const dateRdv = start.toISOString().slice(0, 10);
+
+    if (this.selectedRdvId) {
+      const updated: ApiRDV = {
+        id: this.selectedRdvId,
+        dateRdv,
+        reason: this.formModel.reason || 'Consultation',
+        status: 'Confirmé',
+        patient,
+        doctor
+      };
+
+      this.rdvService.updateRDV(updated).subscribe({
+        next: () => {
+          this.appointments = this.appointments.map(r => r.id === updated.id ? updated : r);
+          this.rebuildEvents();
+          this.uiMessage = 'RDV modifié.';
+        },
+        error: (e) => { console.error(e); this.uiMessage = 'Erreur modification.'; }
+      });
+      return;
+    }
+
+    const payload: Partial<ApiRDV> = {
+      dateRdv,
+      reason: this.formModel.reason || 'Consultation',
+      status: 'Confirmé',
+      patient,
+      doctor
+    };
+
+    this.rdvService.createRDV(payload).subscribe({
+      next: (created) => {
+        this.appointments.push(created);
+        this.rebuildEvents();
+        this.selectedRdvId = created.id;
+        this.uiMessage = 'RDV ajouté.';
+      },
+      error: (e) => { console.error(e); this.uiMessage = 'Erreur ajout.'; }
+    });
+  }
+
+  deleteSelected(): void {
+    this.uiMessage = '';
+    if (!this.selectedRdvId) {
+      this.uiMessage = 'Clique sur un RDV avant de supprimer.';
+      return;
+    }
+
+    const id = this.selectedRdvId;
+    this.rdvService.deleteRDV(id).subscribe({
+      next: () => {
+        this.appointments = this.appointments.filter(r => r.id !== id);
+        this.rebuildEvents();
+        this.resetForm();
+        this.uiMessage = 'RDV supprimé.';
+      },
+      error: (e) => { console.error(e); this.uiMessage = 'Erreur suppression.'; }
+    });
+  }
+
   private onSelect(arg: DateSelectArg): void {
-    const defaultEnd = arg.end ?? new Date(arg.start.getTime() + 30 * 60 * 1000);
+    const end = arg.end ?? new Date(arg.start.getTime() + 60 * 60 * 1000);
     this.selectedRdvId = null;
     this.uiMessage = '';
     this.formModel = {
       ...this.formModel,
-      appointment_date: this.toLocalDateTimeInput(arg.start),
-      end_date: this.toLocalDateTimeInput(defaultEnd)
+      start: this.toLocalInput(arg.start),
+      end: this.toLocalInput(end)
     };
   }
 
   private onEventClick(arg: EventClickArg): void {
     const id = Number(arg.event.id);
-    const existing = this.appointments.find((r) => r.id === id);
-    if (!existing) {
-      return;
-    }
+    const rdv = this.appointments.find(r => r.id === id);
+    if (!rdv) return;
 
     this.selectedRdvId = id;
-    this.uiMessage = `RDV #${id} selectionne. Tu peux maintenant modifier ou supprimer.`;
+    this.uiMessage = `RDV #${id} sélectionné.`;
+
+    const start = this.makeDate(rdv.dateRdv, 9, 0);
+    const end = this.makeDate(rdv.dateRdv, 10, 0);
+
     this.formModel = {
-      id_patient: existing.id_patient,
-      id_doctor: existing.id_doctor,
-      appointment_date: this.toLocalDateTimeInput(existing.appointment_date),
-      end_date: this.toLocalDateTimeInput(existing.end_date ?? existing.appointment_date),
-      reason: existing.reason
+      patientId: rdv.patient.id,
+      doctorId: rdv.doctor.id,
+      start: this.toLocalInput(start),
+      end: this.toLocalInput(end),
+      reason: rdv.reason
     };
   }
 
   private onEventDrop(arg: EventDropArg): void {
     const id = Number(arg.event.id);
-    const existing = this.appointments.find((r) => r.id === id);
-    if (!existing || !arg.event.start) {
-      return;
-    }
+    const rdv = this.appointments.find(r => r.id === id);
+    if (!rdv || !arg.event.start) return;
 
-    const updated: RDV = {
-      ...existing,
-      appointment_date: arg.event.start.toISOString(),
-      end_date: arg.event.end?.toISOString()
-    };
+    const newDate = arg.event.start.toISOString().slice(0, 10);
+    const updated: ApiRDV = { ...rdv, dateRdv: newDate };
 
-    this.rdvService.updateRDV(updated).subscribe(() => {
-      this.appointments = this.appointments.map((r) => (r.id === id ? updated : r));
-      this.rebuildEvents();
+    this.rdvService.updateRDV(updated).subscribe({
+      next: () => {
+        this.appointments = this.appointments.map(r => r.id === id ? updated : r);
+        this.rebuildEvents();
+      },
+      error: (e) => { console.error(e); arg.revert(); }
     });
   }
 
   private onEventResize(arg: EventResizeDoneArg): void {
-    const id = Number(arg.event.id);
-    const existing = this.appointments.find((r) => r.id === id);
-    if (!existing || !arg.event.start || !arg.event.end) {
-      return;
-    }
-
-    const updated: RDV = {
-      ...existing,
-      appointment_date: arg.event.start.toISOString(),
-      end_date: arg.event.end.toISOString()
-    };
-
-    this.rdvService.updateRDV(updated).subscribe(() => {
-      this.appointments = this.appointments.map((r) => (r.id === id ? updated : r));
-      this.rebuildEvents();
-    });
-  }
-
-  private toLocalDateTimeInput(dateLike: string | Date): string {
-    const date = typeof dateLike === 'string' ? new Date(dateLike) : dateLike;
-    const tzOffsetMs = date.getTimezoneOffset() * 60000;
-    return new Date(date.getTime() - tzOffsetMs).toISOString().slice(0, 16);
-  }
-
-  private resolveRdvIdFromForm(): number | null {
-    if (!this.formModel.id_patient || !this.formModel.id_doctor || !this.formModel.appointment_date) {
-      return null;
-    }
-
-    const startIso = new Date(this.formModel.appointment_date).toISOString();
-    const match = this.appointments.find((r) =>
-      r.id_patient === this.formModel.id_patient &&
-      r.id_doctor === this.formModel.id_doctor &&
-      r.appointment_date === startIso
-    );
-
-    return match?.id ?? null;
+    // API ne gère pas end_date -> on ignore resize
+    arg.revert();
+    this.uiMessage = 'Resize ignoré (API ne gère pas end_date).';
   }
 }

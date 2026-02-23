@@ -1,74 +1,55 @@
-<div class="page-shell">
-  <app-sideware currentPage="rdv" />
+<div class="rdv-wrapper" style="padding:16px; max-width:1100px; margin:0 auto;">
 
-  <main class="rdv-container">
-    <div class="rdv-page">
-      <aside class="rdv-actions">
-        <h2>{{ selectedRdvId ? 'Modifier RDV' : 'Nouveau RDV' }}</h2>
-        <p class="selected" *ngIf="selectedRdvId">RDV selectionne: #{{ selectedRdvId }}</p>
+  <h2>Rendez-vous</h2>
 
-        <form class="rdv-form" (ngSubmit)="saveFromForm()">
-          <label>
-            Patient
-            <select name="patient" [(ngModel)]="formModel.id_patient" required>
-              <option [ngValue]="null">Choisir un patient</option>
-              <option *ngFor="let patient of patients" [ngValue]="patient.id_patient">
-                {{ patient.first_name }} {{ patient.last_name }}
-              </option>
-            </select>
-          </label>
+  <div *ngIf="uiMessage" style="margin:10px 0; color:#333;">
+    {{ uiMessage }}
+  </div>
 
-          <label>
-            Medecin
-            <select name="doctor" [(ngModel)]="formModel.id_doctor" required>
-              <option [ngValue]="null">Choisir un medecin</option>
-              <option *ngFor="let doctor of doctors" [ngValue]="doctor.id_doctor">
-                Dr {{ doctor.first_name }} {{ doctor.last_name }}
-              </option>
-            </select>
-          </label>
+  <!-- FORM -->
+  <div style="border:1px solid #ddd; border-radius:12px; padding:16px; background:#fff; margin-bottom:16px;">
+    <h3 style="margin:0 0 12px 0;">{{ selectedRdvId ? 'Modifier RDV' : 'Nouveau RDV' }}</h3>
 
-          <label>
-            Debut
-            <input type="datetime-local" name="start" [(ngModel)]="formModel.appointment_date" required />
-          </label>
+    <div style="display:grid; gap:10px;">
+      <label>Patient</label>
+      <select [(ngModel)]="formModel.patientId">
+        <option [ngValue]="null" disabled>Choisir patient</option>
+        <option *ngFor="let p of patients" [ngValue]="p.id">
+          {{ p.firstName }} {{ p.lastName }}
+        </option>
+      </select>
 
-          <label>
-            Fin
-            <input type="datetime-local" name="end" [(ngModel)]="formModel.end_date" required />
-          </label>
+      <label>Médecin</label>
+      <select [(ngModel)]="formModel.doctorId">
+        <option [ngValue]="null" disabled>Choisir médecin</option>
+        <option *ngFor="let d of doctors" [ngValue]="d.id">
+          Dr {{ d.firstName }} {{ d.lastName }}
+        </option>
+      </select>
 
-          <label>
-            Motif
-            <textarea
-              name="reason"
-              [(ngModel)]="formModel.reason"
-              rows="3"
-              placeholder="Motif de consultation"
-            ></textarea>
-          </label>
+      <label>Début</label>
+      <input type="datetime-local" [(ngModel)]="formModel.start" />
 
-          <div class="actions">
-            <button type="submit" [disabled]="!canSubmitForm()">
-              {{ selectedRdvId ? 'Enregistrer modifications' : 'Ajouter RDV' }}
-            </button>
-            <button type="button" class="ghost" (click)="resetForm()">Nouveau</button>
-            <button type="button" class="danger" (click)="deleteSelected()" [disabled]="!selectedRdvId">
-              Supprimer
-            </button>
-          </div>
-        </form>
+      <label>Fin</label>
+      <input type="datetime-local" [(ngModel)]="formModel.end" />
 
-        <p class="hint">
-          Clique sur un creneau pour pre-remplir le formulaire. Clique sur un RDV pour le modifier.
-          Drag and drop / resize restent actifs dans le calendrier.
-        </p>
-        <p class="message" *ngIf="uiMessage">{{ uiMessage }}</p>
-      </aside>
+      <label>Motif</label>
+      <textarea rows="3" [(ngModel)]="formModel.reason" placeholder="Motif de consultation"></textarea>
 
-      <section class="rdv-calendar">
-        <full-calendar [options]="calendarOptions"></full-calendar>
-      </section>
+      <div style="display:flex; gap:10px; margin-top:8px;">
+        <button (click)="saveFromForm()" [disabled]="!canSubmitForm()">
+          {{ selectedRdvId ? 'Mettre à jour' : 'Ajouter RDV' }}
+        </button>
+        <button type="button" (click)="resetForm()">Nouveau</button>
+        <button type="button" (click)="deleteSelected()" [disabled]="!selectedRdvId">Supprimer</button>
+      </div>
+
+      <small style="opacity:0.8;">
+        Clique sur un créneau pour pré-remplir. Clique sur un RDV pour modifier.
+      </small>
     </div>
-  </main>
+  </div>
+
+  <!-- CALENDAR -->
+  <full-calendar [options]="calendarOptions"></full-calendar>
 </div>
