@@ -1,7 +1,6 @@
 // home.component.ts
 import { Component } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../core/auth/auth.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -9,10 +8,7 @@ import { AuthService } from '../../core/auth/auth.service';
   imports: [RouterLink],
   template: `
     <div class="dashboard">
-      <div class="header">
-        <h1>🏥 Medi-Tracker</h1>
-        <button class="logout" (click)="logout()">Déconnexion</button>
-      </div>
+      <h1>🏥 Medi-Tracker</h1>
       <nav>
         <a routerLink="/patient" class="card">
           <h2>👥 Profil Patients</h2>
@@ -41,21 +37,6 @@ import { AuthService } from '../../core/auth/auth.service';
     h1 {
       margin: 0;
       font-size: 1.8rem;
-    }
-
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-
-    .logout {
-      border: 1px solid var(--border);
-      background: var(--surface);
-      border-radius: 10px;
-      padding: 0.5rem 0.8rem;
-      cursor: pointer;
     }
 
     nav {
@@ -93,14 +74,4 @@ import { AuthService } from '../../core/auth/auth.service';
     }
   `]
 })
-export class HomeComponent {
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
-
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
-}
+export class HomeComponent {}
