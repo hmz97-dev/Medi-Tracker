@@ -26,7 +26,7 @@ import { AuthService } from '../../core/auth/auth.service';
         </button>
 
         <button type="button" class="link" (click)="toggleMode()">
-          {{ isRegisterMode ? 'J\'ai déjà un compte' : 'Créer un nouveau compte' }}
+          {{ isRegisterMode ? "J'ai déjà un compte" : 'Créer un nouveau compte' }}
         </button>
       </form>
     </div>
