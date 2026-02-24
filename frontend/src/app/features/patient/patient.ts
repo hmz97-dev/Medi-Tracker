@@ -5,27 +5,32 @@ import { Sideware } from '../sideware/sideware';
 import { PatientService } from '../../core/service/patient.service';
 import { Patient as PatientModel } from '../../models/patient.model';
 
-type MedicalStatus = 'Recovered' | 'Awaiting surgery' | 'On treatment';
-type StatusFilter = 'All' | MedicalStatus;
+type GenderFilter = 'All' | 'Male' | 'Female' | 'Other';
 
 interface PatientRow {
-	id: number;
-	name: string;
-	diagnosis: string;
-	status: MedicalStatus;
-	lastAppointment: string;
-	nextAppointment: string;
+	id_patient: number;
+	firstName: string;
+	lastName: string;
+	dateOfBirth: string;
+	gender: string;
+	email: string;
+	description: string;
+	adress: string;
+	bloodGroup: string;
 }
 
 interface NewPatientForm {
-	name: string;
-	diagnosis: string;
-	status: MedicalStatus;
-	lastAppointment: string;
-	nextAppointment: string;
+	firstName: string;
+	lastName: string;
+	dateOfBirth: string;
+	gender: string;
+	email: string;
+	description: string;
+	adress: string;
+	bloodGroup: string;
 }
 
-type SortColumn = 'name' | 'diagnosis' | 'status' | 'lastAppointment' | 'nextAppointment';
+type SortColumn = 'firstName' | 'lastName' | 'dateOfBirth' | 'gender' | 'email' | 'adress' | 'bloodGroup';
 type SortDirection = 'asc' | 'desc';
 
 @Component({
@@ -38,11 +43,11 @@ type SortDirection = 'asc' | 'desc';
 export class Patient implements OnInit {
 	constructor(private patientService: PatientService) {}
 
-	readonly filters: StatusFilter[] = ['All', 'Recovered', 'Awaiting surgery', 'On treatment'];
+	readonly filters: GenderFilter[] = ['All', 'Male', 'Female', 'Other'];
 	readonly pageSize = 15;
 
 	searchTerm = '';
-	activeFilter: StatusFilter = 'All';
+	activeFilter: GenderFilter = 'All';
 	showSearch = false;
 	showFilter = false;
 	showAddForm = false;
@@ -50,11 +55,10 @@ export class Patient implements OnInit {
 	currentPage = 1;
 	openedMenuId: number | null = null;
 	feedbackMessage = '';
-	sortColumn: SortColumn = 'name';
+	sortColumn: SortColumn = 'lastName';
 	sortDirection: SortDirection = 'asc';
 
 	newPatient: NewPatientForm = this.emptyForm();
-
 	rows: PatientRow[] = [];
 
 	ngOnInit(): void {
@@ -69,18 +73,15 @@ export class Patient implements OnInit {
 		const normalizedTerm = this.searchTerm.trim().toLowerCase();
 
 		return this.rows.filter((row) => {
-			const matchesFilter = this.activeFilter === 'All' || row.status === this.activeFilter;
-			if (!matchesFilter) {
-				return false;
-			}
-
-			if (!normalizedTerm) {
-				return true;
-			}
+			const matchesFilter =
+				this.activeFilter === 'All' || row.gender === this.activeFilter;
+			if (!matchesFilter) return false;
+			if (!normalizedTerm) return true;
 
 			return (
-				row.name.toLowerCase().includes(normalizedTerm) ||
-				row.diagnosis.toLowerCase().includes(normalizedTerm)
+				row.firstName.toLowerCase().includes(normalizedTerm) ||
+				row.lastName.toLowerCase().includes(normalizedTerm) ||
+				row.email.toLowerCase().includes(normalizedTerm)
 			);
 		});
 	}
@@ -93,13 +94,8 @@ export class Patient implements OnInit {
 		const sortedRows = [...this.filteredRows].sort((left, right) => {
 			const leftValue = this.getSortableValue(left, this.sortColumn);
 			const rightValue = this.getSortableValue(right, this.sortColumn);
-
-			if (leftValue < rightValue) {
-				return this.sortDirection === 'asc' ? -1 : 1;
-			}
-			if (leftValue > rightValue) {
-				return this.sortDirection === 'asc' ? 1 : -1;
-			}
+			if (leftValue < rightValue) return this.sortDirection === 'asc' ? -1 : 1;
+			if (leftValue > rightValue) return this.sortDirection === 'asc' ? 1 : -1;
 			return 0;
 		});
 
@@ -111,14 +107,10 @@ export class Patient implements OnInit {
 		return Array.from({ length: this.totalPages }, (_, index) => index + 1);
 	}
 
-	statusClass(status: MedicalStatus): string {
-		if (status === 'Recovered') {
-			return 'status-recovered';
-		}
-		if (status === 'Awaiting surgery') {
-			return 'status-awaiting';
-		}
-		return 'status-treatment';
+	genderClass(gender: string): string {
+		if (gender === 'Male') return 'gender-male';
+		if (gender === 'Female') return 'gender-female';
+		return 'gender-other';
 	}
 
 	toggleSearch(): void {
@@ -145,7 +137,7 @@ export class Patient implements OnInit {
 		this.showHelp = !this.showHelp;
 	}
 
-	setFilter(filter: StatusFilter): void {
+	setFilter(filter: GenderFilter): void {
 		this.activeFilter = filter;
 		this.currentPage = 1;
 		this.showFilter = false;
@@ -157,9 +149,7 @@ export class Patient implements OnInit {
 	}
 
 	setPage(page: number): void {
-		if (page < 1 || page > this.totalPages) {
-			return;
-		}
+		if (page < 1 || page > this.totalPages) return;
 		this.currentPage = page;
 	}
 
@@ -185,9 +175,7 @@ export class Patient implements OnInit {
 	}
 
 	sortIndicator(column: SortColumn): string {
-		if (this.sortColumn !== column) {
-			return '↕';
-		}
+		if (this.sortColumn !== column) return '↕';
 		return this.sortDirection === 'asc' ? '↑' : '↓';
 	}
 
@@ -203,63 +191,48 @@ export class Patient implements OnInit {
 
 	deleteRow(rowId: number): void {
 		this.patientService.deletePatient(rowId).subscribe(() => {
-			this.rows = this.rows.filter((row) => row.id !== rowId);
+			this.rows = this.rows.filter((row) => row.id_patient !== rowId);
 			this.openedMenuId = null;
 			if (this.currentPage > this.totalPages) {
 				this.currentPage = this.totalPages;
 			}
+			this.feedbackMessage = 'Patient supprimé avec succès.';
 		});
 	}
 
-	cycleStatus(rowId: number): void {
-		this.rows = this.rows.map((row) => {
-			if (row.id !== rowId) {
-				return row;
-			}
-
-			if (row.status === 'Recovered') {
-				return { ...row, status: 'Awaiting surgery' };
-			}
-			if (row.status === 'Awaiting surgery') {
-				return { ...row, status: 'On treatment' };
-			}
-			return { ...row, status: 'Recovered' };
-		});
+	editRow(rowId: number): void {
 		this.openedMenuId = null;
-		this.feedbackMessage = 'Statut du patient mis à jour.';
+		this.feedbackMessage = 'Fonctionnalité de modification à venir.';
 	}
 
 	addPatient(): void {
 		const form = this.newPatient;
-		if (!form.name.trim() || !form.diagnosis.trim() || !form.lastAppointment.trim() || !form.nextAppointment.trim()) {
-			this.feedbackMessage = 'Merci de compléter tous les champs du nouveau patient.';
+		if (
+			!form.firstName.trim() ||
+			!form.lastName.trim() ||
+			!form.dateOfBirth.trim() ||
+			!form.gender ||
+			!form.email.trim()
+		) {
+			this.feedbackMessage = 'Merci de compléter tous les champs obligatoires (prénom, nom, date de naissance, genre, email).';
 			return;
 		}
 
-		const nameParts = form.name.trim().split(' ').filter(Boolean);
-		const firstName = nameParts[0] ?? 'Patient';
-		const lastName = nameParts.slice(1).join(' ') || 'Nouveau';
-		const emailBase = `${firstName}.${lastName}`.replace(/\s+/g, '.').toLowerCase();
-
 		const payload: PatientModel = {
 			id_patient: 0,
-			first_name: firstName,
-			last_name: lastName,
-			email: `${emailBase}.${Date.now()}@meditracker.local`,
+			first_name: form.firstName.trim(),
+			last_name: form.lastName.trim(),
+			date_of_birth: new Date(form.dateOfBirth),
+			gender: form.gender,
+			email: form.email.trim(),
 			phone: '',
-			date_of_birth: new Date('1990-01-01'),
-			gender: 'N/A',
-			blood_group: 'O+',
-			description: form.diagnosis.trim()
+			blood_group: form.bloodGroup,
+			description: form.description.trim(),
+			adress: form.adress.trim()
 		};
 
 		this.patientService.createPatient(payload).subscribe((created) => {
-			const createdRow = this.mapPatientToRow(created);
-			createdRow.status = form.status;
-			createdRow.lastAppointment = form.lastAppointment.trim();
-			createdRow.nextAppointment = form.nextAppointment.trim();
-
-			this.rows = [createdRow, ...this.rows];
+			this.rows = [this.mapPatientToRow(created), ...this.rows];
 			this.currentPage = 1;
 			this.showAddForm = false;
 			this.newPatient = this.emptyForm();
@@ -288,17 +261,20 @@ export class Patient implements OnInit {
 
 	private emptyForm(): NewPatientForm {
 		return {
-			name: '',
-			diagnosis: '',
-			status: 'On treatment',
-			lastAppointment: '',
-			nextAppointment: ''
+			firstName: '',
+			lastName: '',
+			dateOfBirth: '',
+			gender: '',
+			email: '',
+			description: '',
+			adress: '',
+			bloodGroup: ''
 		};
 	}
 
 	private loadPatients(): void {
 		this.patientService.getPatients().subscribe((patients) => {
-			this.rows = patients.map((patient) => this.mapPatientToRow(patient));
+			this.rows = patients.map((p) => this.mapPatientToRow(p));
 			if (this.currentPage > this.totalPages) {
 				this.currentPage = this.totalPages;
 			}
@@ -307,12 +283,17 @@ export class Patient implements OnInit {
 
 	private mapPatientToRow(patient: PatientModel): PatientRow {
 		return {
-			id: patient.id_patient,
-			name: `${patient.first_name} ${patient.last_name}`,
-			diagnosis: patient.description?.trim() ? patient.description : '-',
-			status: 'On treatment',
-			lastAppointment: '-',
-			nextAppointment: '-'
+			id_patient: patient.id_patient,
+			firstName: patient.first_name ?? '',
+			lastName: patient.last_name ?? '',
+			dateOfBirth: patient.date_of_birth
+				? new Date(patient.date_of_birth).toLocaleDateString('fr-FR')
+				: '-',
+			gender: patient.gender ?? '-',
+			email: patient.email ?? '-',
+			description: patient.description?.trim() ? patient.description : '-',
+			adress: patient.adress?.trim() ? patient.adress : '-',
+			bloodGroup: patient.blood_group ?? '-'
 		};
 	}
 }

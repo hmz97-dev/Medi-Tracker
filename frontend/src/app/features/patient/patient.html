@@ -3,7 +3,7 @@
 
 	<main class="content">
 		<section class="register-card">
-			<p class="section-title">Patient registrer</p>
+			<p class="section-title">Patient register</p>
 
 			@if (feedbackMessage) {
 				<div class="feedback">{{ feedbackMessage }}</div>
@@ -12,7 +12,7 @@
 			@if (showHelp) {
 				<div class="help-panel">
 					<strong>Aide rapide</strong>
-					<p>Utilise la recherche pour filtrer les patients, le filtre pour le statut, et le menu ••• pour modifier ou supprimer une ligne.</p>
+					<p>Utilise la recherche pour filtrer les patients, le filtre pour le genre ou le groupe sanguin, et le menu ••• pour modifier ou supprimer une ligne.</p>
 				</div>
 			}
 
@@ -20,15 +20,29 @@
 				<div class="add-form">
 					<h3>Ajouter un patient</h3>
 					<div class="form-grid">
-						<input type="text" placeholder="Nom complet" [(ngModel)]="newPatient.name" />
-						<input type="text" placeholder="Diagnostic" [(ngModel)]="newPatient.diagnosis" />
-						<select [(ngModel)]="newPatient.status">
-							<option value="Recovered">Recovered</option>
-							<option value="Awaiting surgery">Awaiting surgery</option>
-							<option value="On treatment">On treatment</option>
+						<input type="text" placeholder="Prénom" [(ngModel)]="newPatient.firstName" />
+						<input type="text" placeholder="Nom" [(ngModel)]="newPatient.lastName" />
+						<input type="date" placeholder="Date de naissance" [(ngModel)]="newPatient.dateOfBirth" />
+						<select [(ngModel)]="newPatient.gender">
+							<option value="" disabled selected>Genre</option>
+							<option value="Male">Male</option>
+							<option value="Female">Female</option>
+							<option value="Other">Other</option>
 						</select>
-						<input type="text" placeholder="Dernier rendez-vous (jj/mm/aaaa)" [(ngModel)]="newPatient.lastAppointment" />
-						<input type="text" placeholder="Prochain rendez-vous (jj/mm/aaaa)" [(ngModel)]="newPatient.nextAppointment" />
+						<input type="email" placeholder="Email" [(ngModel)]="newPatient.email" />
+						<input type="text" placeholder="Adresse" [(ngModel)]="newPatient.adress" />
+						<select [(ngModel)]="newPatient.bloodGroup">
+							<option value="" disabled selected>Groupe sanguin</option>
+							<option value="A+">A+</option>
+							<option value="A-">A-</option>
+							<option value="B+">B+</option>
+							<option value="B-">B-</option>
+							<option value="AB+">AB+</option>
+							<option value="AB-">AB-</option>
+							<option value="O+">O+</option>
+							<option value="O-">O-</option>
+						</select>
+						<input type="text" placeholder="Description" [(ngModel)]="newPatient.description" class="full-width" />
 					</div>
 					<div class="form-actions">
 						<button type="button" class="cancel-btn" (click)="toggleAddForm()">Annuler</button>
@@ -41,7 +55,7 @@
 				<div class="search-row">
 					<input
 						type="text"
-						placeholder="Rechercher par nom ou diagnostic..."
+						placeholder="Rechercher par nom, prénom ou email..."
 						[(ngModel)]="searchTerm"
 						(input)="onSearchChange()"
 					/>
@@ -87,42 +101,52 @@
 					<thead>
 						<tr>
 							<th>
-								<button type="button" class="th-sort" (click)="sortBy('name')">Name <span>{{ sortIndicator('name') }}</span></button>
+								<button type="button" class="th-sort" (click)="sortBy('firstName')">Prénom <span>{{ sortIndicator('firstName') }}</span></button>
 							</th>
 							<th>
-								<button type="button" class="th-sort" (click)="sortBy('diagnosis')">Diagnosis <span>{{ sortIndicator('diagnosis') }}</span></button>
+								<button type="button" class="th-sort" (click)="sortBy('lastName')">Nom <span>{{ sortIndicator('lastName') }}</span></button>
 							</th>
 							<th>
-								<button type="button" class="th-sort" (click)="sortBy('status')">Status <span>{{ sortIndicator('status') }}</span></button>
+								<button type="button" class="th-sort" (click)="sortBy('dateOfBirth')">Date de naissance <span>{{ sortIndicator('dateOfBirth') }}</span></button>
 							</th>
 							<th>
-								<button type="button" class="th-sort" (click)="sortBy('lastAppointment')">Last Appointment <span>{{ sortIndicator('lastAppointment') }}</span></button>
+								<button type="button" class="th-sort" (click)="sortBy('gender')">Genre <span>{{ sortIndicator('gender') }}</span></button>
 							</th>
 							<th>
-								<button type="button" class="th-sort" (click)="sortBy('nextAppointment')">Next appointment <span>{{ sortIndicator('nextAppointment') }}</span></button>
+								<button type="button" class="th-sort" (click)="sortBy('email')">Email <span>{{ sortIndicator('email') }}</span></button>
+							</th>
+							<th>
+								<button type="button" class="th-sort" (click)="sortBy('adress')">Adresse <span>{{ sortIndicator('adress') }}</span></button>
+							</th>
+							<th>
+								<button type="button" class="th-sort" (click)="sortBy('bloodGroup')">Groupe sanguin <span>{{ sortIndicator('bloodGroup') }}</span></button>
 							</th>
 							<th class="options-col">Options</th>
 						</tr>
 					</thead>
 					<tbody>
-						@for (row of displayedRows; track row.id) {
+						@for (row of displayedRows; track row.id_patient) {
 							<tr>
-								<td>{{ row.name }}</td>
-								<td>{{ row.diagnosis }}</td>
+								<td>{{ row.firstName }}</td>
+								<td>{{ row.lastName }}</td>
+								<td>{{ row.dateOfBirth }}</td>
 								<td>
-									<span class="status-pill" [class]="'status-pill ' + statusClass(row.status)">
-										{{ row.status }}
+									<span class="gender-pill" [class]="'gender-pill ' + genderClass(row.gender)">
+										{{ row.gender }}
 									</span>
 								</td>
-								<td>{{ row.lastAppointment }}</td>
-								<td>{{ row.nextAppointment }}</td>
+								<td>{{ row.email }}</td>
+								<td>{{ row.adress }}</td>
+								<td>
+									<span class="blood-pill">{{ row.bloodGroup }}</span>
+								</td>
 								<td class="options-col">
 									<div class="row-actions">
-										<button type="button" class="menu-trigger" (click)="toggleRowMenu(row.id)">•••</button>
-										@if (openedMenuId === row.id) {
+										<button type="button" class="menu-trigger" (click)="toggleRowMenu(row.id_patient)">•••</button>
+										@if (openedMenuId === row.id_patient) {
 											<div class="menu-popover">
-												<button type="button" (click)="cycleStatus(row.id)">Changer statut</button>
-												<button type="button" class="danger-action" (click)="deleteRow(row.id)">Supprimer</button>
+												<button type="button" (click)="editRow(row.id_patient)">Modifier</button>
+												<button type="button" class="danger-action" (click)="deleteRow(row.id_patient)">Supprimer</button>
 											</div>
 										}
 									</div>
@@ -131,7 +155,7 @@
 						}
 						@if (displayedRows.length === 0) {
 							<tr>
-								<td colspan="6" class="empty-row">Aucun patient trouvé pour ce filtre.</td>
+								<td colspan="8" class="empty-row">Aucun patient trouvé pour ce filtre.</td>
 							</tr>
 						}
 					</tbody>

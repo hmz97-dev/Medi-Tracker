@@ -57,12 +57,13 @@ export class PatientService {
       id_patient: patient.id,
       first_name: patient.firstName,
       last_name: patient.lastName,
-      email: patient.email,
-      phone: '',
+      email: patient.email ?? '',
+      phone: patient.phone ?? '',
       date_of_birth: patient.dateNaissance ? new Date(patient.dateNaissance) : new Date(),
-      gender: patient.gender,
-      blood_group: patient.bloodGroup,
-      description: patient.description
+      gender: patient.gender ?? '',
+      blood_group: patient.bloodGroup ?? '',
+      description: patient.description ?? '',
+      adress: patient.adress ?? ''
     };
   }
 
@@ -78,7 +79,7 @@ export class PatientService {
       gender: patient.gender,
       email: patient.email,
       description: patient.description ?? '',
-      adress: '',
+      adress: patient.adress ?? '',
       bloodGroup: patient.blood_group
     };
   }

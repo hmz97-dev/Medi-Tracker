@@ -96,12 +96,13 @@ export class RDVService {
             id_patient: rdv.patient.id,
             first_name: rdv.patient.firstName,
             last_name: rdv.patient.lastName,
-            email: '',
-            phone: '',
-            date_of_birth: new Date(),
-            gender: '',
-            blood_group: rdv.patient.bloodGroup,
-            description: ''
+            email: rdv.patient.email ?? '',
+            phone: rdv.patient.phone ?? '',
+            date_of_birth: rdv.patient.dateNaissance ? new Date(rdv.patient.dateNaissance) : new Date(),
+            gender: rdv.patient.gender ?? '',
+            blood_group: rdv.patient.bloodGroup ?? '',
+            description: rdv.patient.description ?? '',
+            adress: rdv.patient.adress ?? ''
           }
         : undefined
     };

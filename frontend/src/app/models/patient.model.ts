@@ -7,5 +7,6 @@ export interface Patient {
   date_of_birth: Date
   gender: string;
   blood_group: string;
-  description?: string;
+  description: string;
+  adress: string;
 }
